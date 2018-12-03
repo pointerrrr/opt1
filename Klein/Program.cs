@@ -29,18 +29,20 @@ namespace Klein
             // CONSTRAINTS
             model.AddConstraint("capaciteit_Totaal", ruw1 + ruw2 + ruw3 + ruw4 <= 100000);
 
-            model.AddConstraint("min_A_in_1", 0.98 * olie1A >= 0.6 * (olie1A + olie1B + olie1C));
-            model.AddConstraint("max_C_in_1", 0.98 * olie1C <= 0.35 * (olie1A + olie1B + olie1C));
-            model.AddConstraint("max_C_in_2", 0.98 * olie2C <= 0.3 * (olie2A + olie2B + olie2C));
+            model.AddConstraint("min_A_in_1", (0.98 * olie1A) >= (0.6 * (olie1A + olie1B + olie1C)));
+            model.AddConstraint("max_C_in_1", (0.99 * olie1C) <= (0.35 * (olie1A + olie1B + olie1C)));
+            model.AddConstraint("max_C_in_2", (0.99 * olie2C) <= (0.3 * (olie2A + olie2B + olie2C)));
 
-            model.AddConstraint("capaciteit_A", olie1A + olie2A <= ruw1 * 0.8 + ruw2 * 0.3 + ruw3 * 0.7 + ruw4 * 0.4);
-            model.AddConstraint("capaciteit_B", olie1B + olie2B <= ruw1 * 0.1 + ruw2 * 0.3 + ruw3 * 0.1 + ruw4 * 0.5);
-            model.AddConstraint("capaciteit_C", olie1C + olie2C <= ruw1 * 0.1 + ruw2 * 0.4 + ruw3 * 0.2 + ruw4 * 0.1);
+            model.AddConstraint("capaciteit_A", (olie1A + olie2A) <= (ruw1 * 0.8 + ruw2 * 0.3 + ruw3 * 0.7 + ruw4 * 0.4));
+            model.AddConstraint("capaciteit_B", (olie1B + olie2B) <= (ruw1 * 0.1 + ruw2 * 0.3 + ruw3 * 0.1 + ruw4 * 0.5));
+            model.AddConstraint("capaciteit_C", (olie1C + olie2C) <= (ruw1 * 0.1 + ruw2 * 0.4 + ruw3 * 0.2 + ruw4 * 0.1));
 
+            // GOAL
             model.AddGoal("winst", GoalKind.Maximize, 0.21 * (olie1A + olie1B + olie1C) +
                                                         0.18 * (olie2A + olie2B + olie2C) -
                                                         (0.14 * ruw1 + 0.10 * ruw2 + 0.15 * ruw3 + 0.12 * ruw4));
 
+            // OUTPUT
             Solution solution = context.Solve(new SimplexDirective());
             Console.Write(solution.GetReport());
             Console.Read();
