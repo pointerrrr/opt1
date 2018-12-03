@@ -19,10 +19,10 @@ namespace Klein
             Decision olie2A = new Decision(Domain.RealNonnegative, "productie_olie2_A");
             Decision olie2B = new Decision(Domain.RealNonnegative, "productie_olie2_B");
             Decision olie2C = new Decision(Domain.RealNonnegative, "productie_olie2_C");
-            Decision ruw1 = new Decision(Domain.RealNonnegative, "verwerking_ruw1");
-            Decision ruw2 = new Decision(Domain.RealNonnegative, "verwerking_ruw2");
-            Decision ruw3 = new Decision(Domain.RealNonnegative, "verwerking_ruw3");
-            Decision ruw4 = new Decision(Domain.RealNonnegative, "verwerking_ruw4");
+            Decision ruw1 = new Decision(Domain.RealNonnegative, "inkoop_ruw1");
+            Decision ruw2 = new Decision(Domain.RealNonnegative, "inkoop_ruw2");
+            Decision ruw3 = new Decision(Domain.RealNonnegative, "inkoop_ruw3");
+            Decision ruw4 = new Decision(Domain.RealNonnegative, "inkoop_ruw4");
 
             model.AddDecisions(olie1A, olie1B, olie1C, olie2A, olie2B, olie2C, ruw1, ruw2, ruw3, ruw4);
 
