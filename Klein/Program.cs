@@ -1,4 +1,5 @@
-﻿using Microsoft.SolverFoundation;
+﻿using System;
+using Microsoft.SolverFoundation;
 using Microsoft.SolverFoundation.Common;
 using Microsoft.SolverFoundation.Services;
 
@@ -30,6 +31,16 @@ namespace Klein
             model.AddConstraint("min_A_in_1", 0.98 * olie1A >= 0.6 * (olie1A + olie1B + olie1C));
             model.AddConstraint("max_C_in_1", 0.98 * olie1C <= 0.35 * (olie1A + olie1B + olie1C));
             model.AddConstraint("max_C_in_2", 0.98 * olie2C <= 0.3 * (olie2A + olie2B + olie2C));
+
+
+            model.AddGoal("winst", GoalKind.Maximize, 0.21 * (olie1A + olie1B + olie1C) +
+                                                        0.18 * (olie2A + olie2B + olie2C) -
+                                                        (0.14 * ruw1 + 0.10 * ruw2 + 0.15 * ruw3 + 0.12 * ruw4));
+
+            Solution solution = context.Solve(new SimplexDirective());
+            Console.Write(solution.GetReport());
+            Console.Read();
+
         }
     }
 }
