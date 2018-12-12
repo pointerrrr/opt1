@@ -9,7 +9,7 @@ namespace Groot
 {
     class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             string[] afstanden = File.ReadAllLines(@"..\..\afstanden.txt");
 
@@ -32,7 +32,8 @@ namespace Groot
 
             string[] orderbestand = File.ReadAllLines(@"..\..\orderbestand.txt");
 
-            OrderDescription[] orders = new OrderDescription[orderbestand.Length];
+            Dictionary<int, OrderDescription> orders = new Dictionary<int, OrderDescription>();
+
 
             for(int i = 1; i < orderbestand.Length - 1; i++)
             {
@@ -49,10 +50,37 @@ namespace Groot
                 int h = int.Parse(info[7]);
                 int ib = int.Parse(info[8]);
 
-                orders[i] = new OrderDescription(a, b, c, d, e, f, g, h, i);
+                orders[a] = new OrderDescription(a, b, c, d, e, f, g, h, ib);
             }
 
+            Truck truck1 = new Truck(1);
+            Truck truck2 = new Truck(2);
+
+            findSolution(truck1, truck2);
+
+            printSolution(truck1, truck2);
+
             Console.ReadLine();
+        }
+
+        public static void findSolution(Truck truck1, Truck truck2)
+        {
+
+        }
+
+        public static void printSolution(Truck truck1, Truck truck2)
+        {
+            for(int i = 0; i < 5; i++)
+            {
+                for(int j = 0; j < truck1.Dagen[i].Count; j++)
+                {
+                    Console.WriteLine(truck1.Id + "; " + i + "; " + j + "; " + truck1.Dagen[i][j]);
+                }
+                for (int j = 0; j < truck2.Dagen[i].Count; j++)
+                {
+                    Console.WriteLine(truck2.Id + "; " + i + "; " + j + "; " + truck2.Dagen[i][j]);
+                }
+            }
         }
     }
 
@@ -84,6 +112,24 @@ namespace Groot
             MatrixID = g;
             XCoordinaat = h;
             YCoordinaat = i;
+        }
+    }
+
+    public class Truck
+    {
+        public int Id;
+        public List<int>[] Dagen;
+
+        public Truck(int id)
+        {
+            Id = id;
+            Dagen = new List<int>[5];
+
+            foreach(List<int> list in Dagen)
+            {
+                list.Add(287);
+                list.Add(287);
+            }
         }
     }
 }
