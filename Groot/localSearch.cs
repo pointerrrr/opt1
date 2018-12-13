@@ -54,7 +54,66 @@ namespace Groot
         // TODO !!!
         Tuple<Truck, Truck> newNeighbor(Tuple<Truck, Truck> trucks)
         {
+            int choice = rng.Next(7);
+            switch(choice)
+            {
+                case 0:
+                    addBedrijf(trucks);
+                    break;
+                case 1:
+                    removeBedrijf(trucks);
+                    break;
+                case 2:
+                    swapOrder(trucks);
+                    break;
+                case 3:
+                    addDumpen(trucks);
+                    break;
+                case 4:
+                    removeDumpen(trucks);
+                    break;
+                case 5:
+                    changeOrderDay(trucks);
+                    break;
+                case 6:
+                    changeOrderTruck(trucks);
+                    break;
+            }
+            return null;
+        }
 
+        Tuple<Truck, Truck> addBedrijf(Tuple<Truck, Truck> trucks)
+        {
+            return null;
+        }
+
+        Tuple<Truck, Truck> removeBedrijf(Tuple<Truck, Truck> trucks)
+        {
+            return null;
+        }
+
+        Tuple<Truck, Truck> swapOrder(Tuple<Truck, Truck> trucks)
+        {
+            return null;
+        }
+
+        Tuple<Truck, Truck> addDumpen(Tuple<Truck, Truck> trucks)
+        {
+            return null;
+        }
+
+        Tuple<Truck, Truck> removeDumpen(Tuple<Truck, Truck> trucks)
+        {
+            return null;
+        }
+
+        Tuple<Truck, Truck> changeOrderDay(Tuple<Truck, Truck> trucks)
+        {
+            return null;
+        }
+
+        Tuple<Truck, Truck> changeOrderTruck(Tuple<Truck, Truck> trucks)
+        {
             return null;
         }
 

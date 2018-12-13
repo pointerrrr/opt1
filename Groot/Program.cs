@@ -90,8 +90,7 @@ namespace Groot
 
             foreach(List<int> list in Dagen)
             {
-                list.Add(287);
-                list.Add(287);
+                list.Add(0);
             }
         }
     }
