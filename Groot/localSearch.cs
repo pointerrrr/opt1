@@ -217,7 +217,7 @@ namespace Groot
             {
                 OrderDescription order = kvp.Value;
                 if(!orderVoldaan(trucks, order))
-                    solution += order.LedigingDuurMinuten * order.Frequentie * 3 * 60;
+                    solution += order.LedigingDuurMinuten * order.Frequentie * 3d * 60d;
             }
             solution += addTijden(trucks.Item1);
             solution += addTijden(trucks.Item2);
@@ -333,7 +333,7 @@ namespace Groot
 
             ordersDict = new Dictionary<int, OrderDescription>();
 
-            for (int i = 1; i < orderbestand.Length - 1; i++)
+            for (int i = 1; i < orderbestand.Length; i++)
             {
                 string rij = orderbestand[i];
 
