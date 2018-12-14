@@ -9,33 +9,35 @@ namespace Groot
 {
     class LocalSearch
     {
-        int kmax = 10000;
+        int kmax = 10000000;
         double temp = 100d;
         Random rng = new Random();
         Solution bestSolution = new Solution(new Truck(1), new Truck(2));
         public static AfstandRijtijd[,] afstandenMatrix = null;
         public static Dictionary<int, OrderDescription> ordersDict = null;
         public static OrderDescription[] orders = null;
+        private double MaxPenalty;
 
         public LocalSearch()
         {
             inladen();
             orders = ordersDict.Values.ToArray();
+            MaxPenalty = solutionValue(new Solution(new Truck(1), new Truck(2)));
         }
 
         public Solution FindSolution(Solution trucks)
         {
             Solution currentSolution = new Solution(trucks.Item1.Copy(), trucks.Item2.Copy());
+
             bestSolution = currentSolution;
             orders = ordersDict.Values.ToArray();
             for (int i = 0; i < 1000; i++)
             {
                 int index = rng.Next(0, orders.Length);
-                currentSolution.Item1.Dagen[i / 200].Insert(0, orders[index].Order);
                 currentSolution.Item1.AddBedrijf(orders[index].Order, i % 200, i / 200);
+
                 index = rng.Next(0, orders.Length);
-                currentSolution.Item2.Dagen[i / 200].Insert(0, orders[index].Order);
-                currentSolution.Item2.AddBedrijf(orders[index].Order, i%200, i/200);
+                currentSolution.Item2.AddBedrijf(orders[index].Order, i % 200, i / 200);
             }
 
             for (int i = 0; i < kmax; i++)
@@ -63,7 +65,7 @@ namespace Groot
 
         double acceptanceChance(Solution currentSolution, Solution randomNeighbor, double temp)
         {
-            return Math.Exp(((solutionValue(currentSolution) - solutionValue(randomNeighbor) ) / temp ) );
+            return Math.Exp((currentSolution.Value - randomNeighbor.Value) / temp );
         }
 
         // TODO !!!
@@ -101,20 +103,13 @@ namespace Groot
         Solution addBedrijf(Solution trucks)
         {
             int truck = rng.Next(2);
-            int bedrijf = rng.Next(orders.Length);
-            int dag = rng.Next(5);
-            int plek;
             switch(truck)
             {
                 case 0:
-                    plek = rng.Next(1, trucks.Item1.Dagen[dag].Count - 1);
-                    trucks.Item1.Dagen[dag].Insert(plek, orders[bedrijf].Order);
-                    trucks.Item1.AddBedrijf(orders[bedrijf].Order, plek, dag);
+                    trucks.Item1.AddRandomBedrijf();
                     break;
                 case 1:
-                    plek = rng.Next(1, trucks.Item2.Dagen[dag].Count - 1);
-                    trucks.Item2.Dagen[dag].Insert(plek, orders[bedrijf].Order);
-                    trucks.Item2.AddBedrijf(orders[bedrijf].Order, plek, dag);
+                    trucks.Item2.AddRandomBedrijf();
                     break;
             }
             return trucks;
@@ -123,27 +118,13 @@ namespace Groot
         Solution removeBedrijf(Solution trucks)
         {
             int truck = rng.Next(2);
-            int dag = rng.Next(5);
-            int plek;
-            int count = 0;
             switch(truck)
             {
                 case 0:
-                    plek = rng.Next(1, trucks.Item1.Dagen[dag].Count - 1);
-                    if(trucks.Item1.Dagen[dag][plek] == 0 && count++ < 10)
-                        goto case 0;
-                    if (trucks.Item1.Dagen[dag][plek] != 0)
-                        trucks.Item1.Dagen[dag].RemoveAt(plek);
+                    trucks.Item1.RemoveRandomBedrijf();
                     break;
                 case 1:
-                    plek = rng.Next(1, trucks.Item2.Dagen[dag].Count - 1);
-                    if (trucks.Item2.Dagen[dag][plek] == 0 && count++ < 10)
-                        goto case 1;
-                    if (trucks.Item2.Dagen[dag][plek] != 0)
-                    {
-                        trucks.Item2.Dagen[dag].RemoveAt(plek);
-                        trucks.Item2.RemoveBedrijf(plek, dag);
-                    }
+                    trucks.Item2.RemoveRandomBedrijf();
                     break;
             }
             return trucks;
@@ -152,42 +133,14 @@ namespace Groot
         Solution swapOrder(Solution trucks)
         {
             int truck = rng.Next(2);
-            int dag = rng.Next(5);
-            int plek1;
-            int plek2;
-            int plek1res;
-            int plek2res;
+
             switch (truck)
             {
                 case 0:
-                    plek1 = rng.Next(1, trucks.Item1.Dagen[dag].Count - 1);
-                    plek2 = rng.Next(1, trucks.Item1.Dagen[dag].Count - 1);
-
-                    plek1res = trucks.Item1.Dagen[dag][plek1];
-                    plek2res = trucks.Item1.Dagen[dag][plek2];
-
-                    trucks.Item1.RemoveBedrijf(plek1, dag);
-                    trucks.Item1.RemoveBedrijf(plek2, dag);
-                    trucks.Item1.AddBedrijf(plek2res , plek1, dag);
-                    trucks.Item1.AddBedrijf(plek1res, plek2, dag);
-
-                    trucks.Item1.Dagen[dag][plek1] = trucks.Item1.Dagen[dag][plek2];
-                    trucks.Item1.Dagen[dag][plek2] = plek1res;
+                    trucks.Item1.SwapRandomOrderInDay();
                     break;
                 case 1:
-                    plek1 = rng.Next(1, trucks.Item2.Dagen[dag].Count - 1);
-                    plek2 = rng.Next(1, trucks.Item2.Dagen[dag].Count - 1);
-
-                    plek1res = trucks.Item2.Dagen[dag][plek1];
-                    plek2res = trucks.Item2.Dagen[dag][plek2];
-
-                    trucks.Item2.RemoveBedrijf(plek1, dag);
-                    trucks.Item2.RemoveBedrijf(plek2, dag);
-                    trucks.Item2.AddBedrijf(plek2res, plek1, dag);
-                    trucks.Item2.AddBedrijf(plek1res, plek2, dag);
-
-                    trucks.Item2.Dagen[dag][plek1] = trucks.Item2.Dagen[dag][plek2];
-                    trucks.Item2.Dagen[dag][plek2] = plek1res;
+                    trucks.Item2.SwapRandomOrderInDay();
                     break;
             }
             return trucks;
@@ -196,21 +149,14 @@ namespace Groot
         Solution addDumpen(Solution trucks)
         {
             int truck = rng.Next(2);
-            int dag = rng.Next(5);
-            int plek;
+
             switch (truck)
             {
                 case 0:
-                    plek = rng.Next(1, trucks.Item1.Dagen[dag].Count);
-                    trucks.Item1.Value += 30 * 60;
-                    trucks.Item1.AddBedrijf(0, plek, dag);
-                    trucks.Item1.Dagen[dag].Insert(plek, 0);
+                    trucks.Item1.AddRandomDump();
                     break;
                 case 1:
-                    plek = rng.Next(1, trucks.Item2.Dagen[dag].Count);
-                    trucks.Item2.Value += 30 * 60;
-                    trucks.Item2.AddBedrijf(0, plek, dag);
-                    trucks.Item2.Dagen[dag].Insert(plek, 0);
+                    trucks.Item2.AddRandomDump();
                     break;
             }
             return trucks;
@@ -219,56 +165,14 @@ namespace Groot
         Solution removeDumpen(Solution trucks)
         {
             int truck = rng.Next(2);
-            int dag = rng.Next(5);
-            
-            int count;
-            int plek;
+
             switch (truck)
             {
                 case 0:
-                    count = trucks.Item1.Dagen[dag].Count(a => { return a == 0; });
-                    if (count < 2)
-                        goto default;
-                    plek = rng.Next(0, count - 1);
-                    count = 0;
-                    for (int i = 0; i < trucks.Item1.Dagen[dag].Count; i++)
-                    {
-                        if (trucks.Item1.Dagen[dag][i] == 0)
-                        {
-                            if (count == plek)
-                            {
-                                trucks.Item1.Value -= 30 * 60;
-                                trucks.Item1.RemoveBedrijf(plek, dag);
-                                trucks.Item1.Dagen[dag].RemoveAt(i);
-                                
-                                break;
-                            }
-                            count++;
-                        }
-                    }
+                    trucks.Item1.RemoveRandomDump();
                     break;
                 case 1:
-                    count = trucks.Item2.Dagen[dag].Count(a => { return a == 0; });
-                    if (count < 2)
-                        goto default;
-                    plek = rng.Next(0, count - 1);
-                    count = 0;
-                    for(int i = 0; i < trucks.Item2.Dagen[dag].Count; i++)
-                    {
-                        if (trucks.Item2.Dagen[dag][i] == 0)
-                        {
-                            if (count == plek)
-                            {
-                                trucks.Item2.Value -= 30 * 60;
-                                trucks.Item2.RemoveBedrijf(plek, dag);
-                                trucks.Item2.Dagen[dag].RemoveAt(i);
-                                break;
-                            }
-                            count++;
-                        }
-                    }
-                    break;
-                default:
+                    trucks.Item2.RemoveRandomDump();
                     break;
             }
             return trucks;
@@ -277,52 +181,14 @@ namespace Groot
         Solution changeOrderDay(Solution trucks)
         {
             int truck = rng.Next(2);
-            int dag1 = rng.Next(5);
-            int dag2 = rng.Next(5);
-
-            while (dag1 == dag2)
-                dag2 = rng.Next(5);
-
-            int plek1;
-            int plek2;
-            int plek1res;
-            int plek2res;
-            int count = 0;
+            
             switch (truck)
             {
                 case 0:
-                    plek1 = rng.Next(1, trucks.Item1.Dagen[dag1].Count - 1);
-                    plek2 = rng.Next(1, trucks.Item1.Dagen[dag2].Count - 1);
-                    if ((trucks.Item1.Dagen[dag1][plek1] == 0 || trucks.Item1.Dagen[dag2][plek2] == 0) && count++ < 10)
-                        goto case 0;
-                    if (count < 10)
-                    {
-                        plek1res = trucks.Item1.Dagen[dag1][plek1];
-                        plek2res = trucks.Item1.Dagen[dag2][plek2];
-                        trucks.Item1.RemoveBedrijf(plek1, dag1);
-                        trucks.Item1.RemoveBedrijf(plek2, dag2);
-                        trucks.Item1.AddBedrijf(plek2res, plek1, dag1);
-                        trucks.Item1.AddBedrijf(plek1res, plek2, dag2);
-                        trucks.Item1.Dagen[dag1][plek1] = trucks.Item1.Dagen[dag2][plek2];
-                        trucks.Item1.Dagen[dag2][plek2] = plek1res;
-                    }
+                    trucks.Item1.swapRandomOrderDiffDay();
                     break;
                 case 1:
-                    plek1 = rng.Next(1, trucks.Item2.Dagen[dag1].Count - 1);
-                    plek2 = rng.Next(1, trucks.Item2.Dagen[dag2].Count - 1);
-                    if ((trucks.Item2.Dagen[dag1][plek1] == 0 || trucks.Item2.Dagen[dag2][plek2] == 0) && count++ < 10)
-                        goto case 1;
-                    if (count < 10)
-                    {
-                        plek1res = trucks.Item2.Dagen[dag1][plek1];
-                        plek2res = trucks.Item2.Dagen[dag2][plek2];
-                        trucks.Item2.RemoveBedrijf(plek1, dag1);
-                        trucks.Item2.RemoveBedrijf(plek2, dag2);
-                        trucks.Item2.AddBedrijf(plek2res, plek1, dag1);
-                        trucks.Item2.AddBedrijf(plek1res, plek2, dag2);
-                        trucks.Item2.Dagen[dag1][plek1] = trucks.Item2.Dagen[dag2][plek2];
-                        trucks.Item2.Dagen[dag2][plek2] = plek1res;
-                    }
+                    trucks.Item2.swapRandomOrderDiffDay();
                     break;
             }
             return trucks;
@@ -331,58 +197,34 @@ namespace Groot
         Solution changeOrderTruck(Solution trucks)
         {
             int truck = rng.Next(2);
-            int dag1 = rng.Next(5);
-            int dag2 = rng.Next(5);
 
-            int plek1;
-            int plek2;
-            int plek1res;
-            int counter = 0;
             switch (truck)
             {
                 case 0:
-                    plek1 = rng.Next(1, trucks.Item1.Dagen[dag1].Count - 1);
-                    plek2 = rng.Next(1, trucks.Item2.Dagen[dag2].Count - 1);
-                    if ((trucks.Item1.Dagen[dag1][plek1] == 0 || trucks.Item2.Dagen[dag2][plek2] == 0) && counter++ < 10)
-                        goto case 0;
-                    if (counter < 10)
-                    {
-                        plek1res = trucks.Item1.Dagen[dag1][plek1];
-                        trucks.Item1.Dagen[dag1].RemoveAt(plek1);
-                        trucks.Item2.Dagen[dag2].Insert(plek2, plek1res);
-                    }
+                    trucks.Item1.swapOrderDiffTruck(trucks.Item2);
                     break;
                 case 1:
-                    plek1 = rng.Next(1, trucks.Item2.Dagen[dag1].Count - 1);
-                    plek2 = rng.Next(1, trucks.Item1.Dagen[dag2].Count - 1);
-                    if ((trucks.Item2.Dagen[dag1][plek1] == 0 || trucks.Item1.Dagen[dag2][plek2] == 0) && counter++ < 10)
-                        goto case 1;
-                    if (counter < 10)
-                    {
-                        plek1res = trucks.Item2.Dagen[dag1][plek1];
-                        trucks.Item2.Dagen[dag1].RemoveAt(plek1);
-                        trucks.Item1.Dagen[dag2].Insert(plek2, plek1res);
-                    }
+                    trucks.Item2.swapOrderDiffTruck(trucks.Item1);
                     break;
             }
             return trucks;
         }
 
-        double solutionValue(Solution trucks)
+        public static double solutionValue(Solution trucks)
         {
             double solution = 0;
             foreach(KeyValuePair<int, OrderDescription> kvp in ordersDict)
             {
                 OrderDescription order = kvp.Value;
                 if(!orderVoldaan(trucks, order))
-                    solution += order.LedigingDuurMinuten * order.Frequentie * 3;
+                    solution += order.LedigingDuurMinuten * order.Frequentie * 3 * 60;
             }
             solution += addTijden(trucks.Item1);
             solution += addTijden(trucks.Item2);
             return solution;
         }
 
-        double addTijden(Truck truck)
+        static double addTijden(Truck truck)
         {
             double solution = 0;
             foreach (List<int> dagen in truck.Dagen)
@@ -426,7 +268,7 @@ namespace Groot
         }
 
         // TODO
-        bool orderVoldaan(Solution trucks, OrderDescription order)
+        static bool orderVoldaan(Solution trucks, OrderDescription order)
         {
             bool result = true;
             Predicate<int> p = i => i == order.Order;
@@ -466,12 +308,6 @@ namespace Groot
                     break;
             }
             return result;
-        }
-
-        // TODO!!!
-        double temperature(int i, int kmax)
-        {
-            return (double)i / kmax;
         }
 
         void inladen()
