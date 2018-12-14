@@ -11,7 +11,7 @@ namespace Groot
     {
         public static void Main(string[] args)
         {
-            Tuple<Truck, Truck> trucks = new Tuple<Truck, Truck>(new Truck(0), new Truck(1));
+            Solution trucks = new Solution(new Truck(1), new Truck(2));
 
             LocalSearch search = new LocalSearch();
 
@@ -24,12 +24,12 @@ namespace Groot
 
 
 
-        public static void findSolution(Tuple<Truck, Truck> trucks)
+        public static void findSolution(Solution trucks)
         {
 
         }
 
-        public static void printSolution(Tuple<Truck, Truck> trucks)
+        public static void printSolution(Solution trucks)
         {
             Truck truck1 = trucks.Item1;
             Truck truck2 = trucks.Item2;
@@ -37,11 +37,11 @@ namespace Groot
             {
                 for(int j = 0; j < truck1.Dagen[i].Count; j++)
                 {
-                    Console.WriteLine(truck1.Id + "; " + i + "; " + j + "; " + truck1.Dagen[i][j]);
+                    Console.WriteLine(truck1.Id + "; " + (i+1) + "; " + (j+1) + "; " + truck1.Dagen[i][j]);
                 }
                 for (int j = 0; j < truck2.Dagen[i].Count; j++)
                 {
-                    Console.WriteLine(truck2.Id + "; " + i + "; " + j + "; " + truck2.Dagen[i][j]);
+                    Console.WriteLine(truck2.Id + "; " + (i+1) + "; " + (j+1) + "; " + truck2.Dagen[i][j]);
                 }
             }
         }
@@ -103,6 +103,25 @@ namespace Groot
         {
             Truck result = new Truck(Id);
             result.Dagen = Dagen.Take(Dagen.Length).ToArray();
+            return result;
+        }
+    }
+
+    public class Solution
+    {
+        public Truck Item1, Item2;
+        public int Value;
+
+        public Solution(Truck truck1, Truck truck2)
+        {
+            Item1 = truck1.Copy();
+            Item2 = truck2.Copy();
+        }
+
+        public Solution Copy()
+        {
+            Solution result = new Solution(Item1,Item2);
+            result.Value = Value;
             return result;
         }
     }
