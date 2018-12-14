@@ -9,21 +9,32 @@ namespace Groot
 {
     class LocalSearch
     {
-        int kmax = 100000;
+        int kmax = 10000;
         double temp = 100d;
         Random rng = new Random();
         Tuple<Truck, Truck> bestSolution = new Tuple<Truck, Truck>(new Truck(0), new Truck(1));
         AfstandRijtijd[,] afstandenMatrix = null;
-        Dictionary<int, OrderDescription> orders = null;
+        Dictionary<int, OrderDescription> ordersDict = null;
+        OrderDescription[] orders = null;
 
         public LocalSearch()
         {
-            inladen(afstandenMatrix, orders);
+            inladen();
+            orders = ordersDict.Values.ToArray();
         }
 
-        public void FindSolution(Tuple<Truck, Truck> trucks)
+        public Tuple<Truck,Truck> FindSolution(Tuple<Truck, Truck> trucks)
         {
-            Tuple<Truck, Truck> currentSolution = new Tuple<Truck, Truck>(new Truck(0), new Truck(1));
+            Tuple<Truck, Truck> currentSolution = new Tuple<Truck, Truck>(trucks.Item1.Copy(), trucks.Item2.Copy());
+            bestSolution = currentSolution;
+            orders = ordersDict.Values.ToArray();
+            for (int i = 0; i < 50; i++)
+            {
+                currentSolution.Item1.Dagen[i / 10].Insert(0, orders[rng.Next(0, orders.Length)].Order);
+
+                currentSolution.Item2.Dagen[i / 10].Insert(0, orders[rng.Next(0, orders.Length)].Order);
+            }
+
             for (int i = 0; i < kmax; i++)
             {
                 if(i % 10000 == 0)
@@ -33,7 +44,7 @@ namespace Groot
 
                 Tuple<Truck, Truck> randomNeighbor = newNeighbor(currentSolution);
 
-                if (acceptanceChance(currentSolution, randomNeighbor, temp) >= rng.NextDouble() || solutionValue(randomNeighbor) > solutionValue(currentSolution))
+                if (acceptanceChance(currentSolution, randomNeighbor, temp) >= rng.NextDouble() || solutionValue(randomNeighbor) < solutionValue(currentSolution))
                 {
                     currentSolution = randomNeighbor;
                     if (solutionValue(currentSolution) > solutionValue(bestSolution))
@@ -42,8 +53,9 @@ namespace Groot
                     }
                 }
 
-                trucks = bestSolution;
+                
             }
+            return bestSolution;
         }
 
         double acceptanceChance(Tuple<Truck,Truck> currentSolution, Tuple<Truck,Truck> randomNeighbor, double temp)
@@ -54,73 +66,245 @@ namespace Groot
         // TODO !!!
         Tuple<Truck, Truck> newNeighbor(Tuple<Truck, Truck> trucks)
         {
+            Tuple<Truck, Truck> result = new Tuple<Truck, Truck>(trucks.Item1.Copy(), trucks.Item2.Copy());
             int choice = rng.Next(7);
             switch(choice)
             {
                 case 0:
-                    addBedrijf(trucks);
+                    addBedrijf(result);
                     break;
                 case 1:
-                    removeBedrijf(trucks);
+                    removeBedrijf(result);
                     break;
                 case 2:
-                    swapOrder(trucks);
+                    swapOrder(result);
                     break;
                 case 3:
-                    addDumpen(trucks);
+                    addDumpen(result);
                     break;
                 case 4:
-                    removeDumpen(trucks);
+                    removeDumpen(result);
                     break;
                 case 5:
-                    changeOrderDay(trucks);
+                    changeOrderDay(result);
                     break;
                 case 6:
-                    changeOrderTruck(trucks);
+                    changeOrderTruck(result);
                     break;
             }
-            return null;
+            return result;
         }
 
         Tuple<Truck, Truck> addBedrijf(Tuple<Truck, Truck> trucks)
         {
-            return null;
+            int truck = rng.Next(2);
+            int bedrijf = rng.Next(orders.Length);
+            int dag = rng.Next(5);
+            int plek;
+            switch(truck)
+            {
+                case 0:
+                    plek = rng.Next(1, trucks.Item1.Dagen[dag].Count - 1);
+                    trucks.Item1.Dagen[dag].Insert(plek, orders[bedrijf].Order);
+                    break;
+                case 1:
+                    plek = rng.Next(1, trucks.Item2.Dagen[dag].Count - 1);
+                    trucks.Item2.Dagen[dag].Insert(plek, orders[bedrijf].Order);
+                    break;
+            }
+            return trucks;
         }
 
         Tuple<Truck, Truck> removeBedrijf(Tuple<Truck, Truck> trucks)
         {
-            return null;
+            int truck = rng.Next(2);
+            int dag = rng.Next(5);
+            int plek;
+            int count = 0;
+            switch(truck)
+            {
+                case 0:
+                    plek = rng.Next(1, trucks.Item1.Dagen[dag].Count - 1);
+                    if(trucks.Item1.Dagen[dag][plek] == 0 && count++ < 10)
+                        goto case 0;
+                    if (trucks.Item1.Dagen[dag][plek] != 0)
+                        trucks.Item1.Dagen[dag].RemoveAt(plek);
+                    break;
+                case 1:
+                    plek = rng.Next(1, trucks.Item2.Dagen[dag].Count - 1);
+                    if (trucks.Item2.Dagen[dag][plek] == 0 && count++ < 10)
+                        goto case 1;
+                    if(trucks.Item2.Dagen[dag][plek] != 0)
+                        trucks.Item2.Dagen[dag].RemoveAt(plek);
+                    break;
+            }
+            return trucks;
         }
 
         Tuple<Truck, Truck> swapOrder(Tuple<Truck, Truck> trucks)
         {
-            return null;
+            int truck = rng.Next(2);
+            int dag = rng.Next(5);
+            int plek1;
+            int plek2;
+            int plek1res;
+            switch (truck)
+            {
+                case 0:
+                    plek1 = rng.Next(1, trucks.Item1.Dagen[dag].Count - 1);
+                    plek2 = rng.Next(1, trucks.Item1.Dagen[dag].Count - 1);
+                    plek1res = trucks.Item1.Dagen[dag][plek1];
+                    trucks.Item1.Dagen[dag][plek1] = trucks.Item1.Dagen[dag][plek2];
+                    trucks.Item1.Dagen[dag][plek2] = plek1res;
+                    break;
+                case 1:
+                    plek1 = rng.Next(1, trucks.Item2.Dagen[dag].Count - 1);
+                    plek2 = rng.Next(1, trucks.Item2.Dagen[dag].Count - 1);
+                    plek1res = trucks.Item2.Dagen[dag][plek1];
+                    trucks.Item2.Dagen[dag][plek1] = trucks.Item2.Dagen[dag][plek2];
+                    trucks.Item2.Dagen[dag][plek2] = plek1res;
+                    break;
+            }
+            return trucks;
         }
 
         Tuple<Truck, Truck> addDumpen(Tuple<Truck, Truck> trucks)
         {
-            return null;
+            int truck = rng.Next(2);
+            int dag = rng.Next(5);
+            int plek;
+            switch (truck)
+            {
+                case 0:
+                    plek = rng.Next(1, trucks.Item1.Dagen[dag].Count);
+                    trucks.Item1.Dagen[dag].Insert(plek, 0);
+                    break;
+                case 1:
+                    plek = rng.Next(1, trucks.Item2.Dagen[dag].Count);
+                    trucks.Item2.Dagen[dag].Insert(plek, 0);
+                    break;
+            }
+            return trucks;
         }
 
         Tuple<Truck, Truck> removeDumpen(Tuple<Truck, Truck> trucks)
         {
-            return null;
+            int truck = rng.Next(2);
+            int dag = rng.Next(5);
+            
+            int count;
+            int plek;
+            switch (truck)
+            {
+                case 0:
+                    count = trucks.Item1.Dagen[dag].Count(a => { return a == 0; });
+                    if (count < 2)
+                        goto default;
+                    plek = rng.Next(0, count - 1);
+                    count = 0;
+                    for (int i = 0; i < trucks.Item1.Dagen[dag].Count; i++)
+                    {
+                        if (trucks.Item1.Dagen[dag][i] == 0)
+                        {
+                            if (count == plek)
+                            {
+                                trucks.Item1.Dagen[dag].RemoveAt(i);
+                                break;
+                            }
+                            count++;
+                        }
+                    }
+                    break;
+                case 1:
+                    count = trucks.Item2.Dagen[dag].Count(a => { return a == 0; });
+                    if (count < 2)
+                        goto default;
+                    plek = rng.Next(0, count - 1);
+                    count = 0;
+                    for(int i = 0; i < trucks.Item2.Dagen[dag].Count; i++)
+                    {
+                        if (trucks.Item2.Dagen[dag][i] == 0)
+                        {
+                            if (count == plek)
+                            {
+                                trucks.Item2.Dagen[dag].RemoveAt(i);
+                                break;
+                            }
+                            count++;
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+            return trucks;
         }
 
         Tuple<Truck, Truck> changeOrderDay(Tuple<Truck, Truck> trucks)
         {
-            return null;
+            int truck = rng.Next(2);
+            int dag1 = rng.Next(5);
+            int dag2 = rng.Next(5);
+
+            while (dag1 == dag2)
+                dag2 = rng.Next(5);
+
+            int plek1;
+            int plek2;
+            int plek1res;
+            switch (truck)
+            {
+                case 0:
+                    plek1 = rng.Next(1, trucks.Item1.Dagen[dag1].Count - 1);
+                    plek2 = rng.Next(1, trucks.Item1.Dagen[dag2].Count - 1);
+                    plek1res = trucks.Item1.Dagen[dag1][plek1];
+                    trucks.Item1.Dagen[dag1][plek1] = trucks.Item1.Dagen[dag2][plek2];
+                    trucks.Item1.Dagen[dag2][plek2] = plek1res;
+                    break;
+                case 1:
+                    plek1 = rng.Next(1, trucks.Item2.Dagen[dag1].Count - 1);
+                    plek2 = rng.Next(1, trucks.Item2.Dagen[dag2].Count - 1);
+                    plek1res = trucks.Item2.Dagen[dag1][plek1];
+                    trucks.Item2.Dagen[dag1][plek1] = trucks.Item2.Dagen[dag2][plek2];
+                    trucks.Item2.Dagen[dag2][plek2] = plek1res;
+                    break;
+            }
+            return trucks;
         }
 
         Tuple<Truck, Truck> changeOrderTruck(Tuple<Truck, Truck> trucks)
         {
-            return null;
+            int truck = rng.Next(2);
+            int dag1 = rng.Next(5);
+            int dag2 = rng.Next(5);
+
+            int plek1;
+            int plek2;
+            int plek1res;
+            switch (truck)
+            {
+                case 0:
+                    plek1 = rng.Next(1, trucks.Item1.Dagen[dag1].Count - 1);
+                    plek2 = rng.Next(1, trucks.Item2.Dagen[dag2].Count - 1);
+                    plek1res = trucks.Item1.Dagen[dag1][plek1];
+                    trucks.Item1.Dagen[dag1].RemoveAt(plek1);
+                    trucks.Item2.Dagen[dag2].Insert(plek2, plek1res);
+                    break;
+                case 1:
+                    plek1 = rng.Next(1, trucks.Item2.Dagen[dag1].Count - 1);
+                    plek2 = rng.Next(1, trucks.Item1.Dagen[dag2].Count - 1);
+                    plek1res = trucks.Item2.Dagen[dag1][plek1];
+                    trucks.Item2.Dagen[dag1].RemoveAt(plek1);
+                    trucks.Item1.Dagen[dag2].Insert(plek2, plek1res);
+                    break;
+            }
+            return trucks;
         }
 
         double solutionValue(Tuple<Truck, Truck> trucks)
         {
             double solution = 0;
-            foreach(KeyValuePair<int, OrderDescription> kvp in orders)
+            foreach(KeyValuePair<int, OrderDescription> kvp in ordersDict)
             {
                 OrderDescription order = kvp.Value;
                 if(!orderVoldaan(trucks, order))
@@ -128,6 +312,8 @@ namespace Groot
             }
             solution += addTijden(trucks.Item1);
             solution += addTijden(trucks.Item2);
+            if (solution > 690 * 2)
+                return solution * 10;
             return solution;
         }
 
@@ -138,7 +324,16 @@ namespace Groot
             {
                 for (int i = 1; i < dagen.Count; i++)
                 {
-                    solution += afstandenMatrix[dagen[i - 1], dagen[i]].Rijtijd;
+                    int a = dagen[i-1], b = dagen[i];
+                    if (a == 0)
+                        a = 287;
+                    else
+                        a = ordersDict[a].MatrixID;
+                    if (b == 0)
+                        b = 287;
+                    else
+                        b = ordersDict[b].MatrixID;
+                    solution += afstandenMatrix[a,b].Rijtijd;
                 }
             }
             return solution;
@@ -149,11 +344,22 @@ namespace Groot
         {
             bool result = true;
             Predicate<int> p = i => i == order.Order;
-            List<int> a = (List<int>)trucks.Item1.Dagen[0].Concat(trucks.Item2.Dagen[0]);
-            List<int> b = (List<int>)trucks.Item1.Dagen[1].Concat(trucks.Item2.Dagen[1]);
-            List<int> c = (List<int>)trucks.Item1.Dagen[2].Concat(trucks.Item2.Dagen[2]);
-            List<int> d = (List<int>)trucks.Item1.Dagen[3].Concat(trucks.Item2.Dagen[3]);
-            List<int> e = (List<int>)trucks.Item1.Dagen[4].Concat(trucks.Item2.Dagen[4]);
+            List<int> a = new List<int>(), b = new List<int>(), c = new List<int>(), d = new List<int>(), e = new List<int>();
+            for (int i = 0; i < trucks.Item1.Dagen[0].Count; i++)
+                a.Add(trucks.Item1.Dagen[0][i]);
+            a.AddRange(trucks.Item2.Dagen[0]);
+            for (int i = 0; i < trucks.Item1.Dagen[1].Count; i++)
+                b.Add(trucks.Item1.Dagen[1][i]);
+            b.AddRange(trucks.Item2.Dagen[1]);
+            for (int i = 0; i < trucks.Item1.Dagen[2].Count; i++)
+                c.Add(trucks.Item1.Dagen[2][i]);
+            c.AddRange(trucks.Item2.Dagen[2]);
+            for (int i = 0; i < trucks.Item1.Dagen[3].Count; i++)
+                d.Add(trucks.Item1.Dagen[3][i]);
+            d.AddRange(trucks.Item2.Dagen[3]);
+            for (int i = 0; i < trucks.Item1.Dagen[4].Count; i++)
+                e.Add(trucks.Item1.Dagen[4][i]);
+            e.AddRange(trucks.Item2.Dagen[4]);
 
             switch (order.Frequentie)
             {
@@ -182,7 +388,7 @@ namespace Groot
             return (double)i / kmax;
         }
 
-        void inladen(AfstandRijtijd[,] afstandenMatrix, Dictionary<int, OrderDescription> orders)
+        void inladen()
         {
             string[] afstanden = File.ReadAllLines(@"..\..\afstanden.txt");
 
@@ -203,7 +409,7 @@ namespace Groot
             
             string[] orderbestand = File.ReadAllLines(@"..\..\orderbestand.txt");
 
-            orders = new Dictionary<int, OrderDescription>();
+            ordersDict = new Dictionary<int, OrderDescription>();
 
             for (int i = 1; i < orderbestand.Length - 1; i++)
             {
@@ -220,8 +426,9 @@ namespace Groot
                 int h = int.Parse(info[7]);
                 int ib = int.Parse(info[8]);
 
-                orders[a] = new OrderDescription(a, b, c, d, e, f, g, h, ib);
+                ordersDict[a] = new OrderDescription(a, b, c, d, e, f, g, h, ib);
             }
         }
     }
 }
+

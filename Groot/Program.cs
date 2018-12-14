@@ -88,10 +88,22 @@ namespace Groot
             Id = id;
             Dagen = new List<int>[5];
 
+            for(int i = 0; i < 5; i++)
+            {
+                Dagen[i] = new List<int>();
+            }
+
             foreach(List<int> list in Dagen)
             {
                 list.Add(0);
             }
+        }
+
+        public Truck Copy()
+        {
+            Truck result = new Truck(Id);
+            result.Dagen = Dagen.Take(Dagen.Length).ToArray();
+            return result;
         }
     }
 }
