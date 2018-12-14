@@ -13,9 +13,9 @@ namespace Groot
         double temp = 100d;
         Random rng = new Random();
         Solution bestSolution = new Solution(new Truck(1), new Truck(2));
-        AfstandRijtijd[,] afstandenMatrix = null;
-        Dictionary<int, OrderDescription> ordersDict = null;
-        OrderDescription[] orders = null;
+        public static AfstandRijtijd[,] afstandenMatrix = null;
+        public static Dictionary<int, OrderDescription> ordersDict = null;
+        public static OrderDescription[] orders = null;
 
         public LocalSearch()
         {
@@ -28,11 +28,14 @@ namespace Groot
             Solution currentSolution = new Solution(trucks.Item1.Copy(), trucks.Item2.Copy());
             bestSolution = currentSolution;
             orders = ordersDict.Values.ToArray();
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < 1000; i++)
             {
-                currentSolution.Item1.Dagen[i / 10].Insert(0, orders[rng.Next(0, orders.Length)].Order);
-
-                currentSolution.Item2.Dagen[i / 10].Insert(0, orders[rng.Next(0, orders.Length)].Order);
+                int index = rng.Next(0, orders.Length);
+                currentSolution.Item1.Dagen[i / 200].Insert(0, orders[index].Order);
+                currentSolution.Item1.AddBedrijf(orders[index].Order, i % 200, i / 200);
+                index = rng.Next(0, orders.Length);
+                currentSolution.Item2.Dagen[i / 200].Insert(0, orders[index].Order);
+                currentSolution.Item2.AddBedrijf(orders[index].Order, i%200, i/200);
             }
 
             for (int i = 0; i < kmax; i++)
@@ -44,10 +47,10 @@ namespace Groot
 
                 Solution randomNeighbor = newNeighbor(currentSolution);
 
-                if (acceptanceChance(currentSolution, randomNeighbor, temp) >= rng.NextDouble() || solutionValue(randomNeighbor) < solutionValue(currentSolution))
+                if (acceptanceChance(currentSolution, randomNeighbor, temp) >= rng.NextDouble() || randomNeighbor.Value < currentSolution.Value)
                 {
                     currentSolution = randomNeighbor;
-                    if (solutionValue(currentSolution) > solutionValue(bestSolution))
+                    if (currentSolution.Value < bestSolution.Value)
                     {
                         bestSolution = randomNeighbor;
                     }
@@ -106,10 +109,12 @@ namespace Groot
                 case 0:
                     plek = rng.Next(1, trucks.Item1.Dagen[dag].Count - 1);
                     trucks.Item1.Dagen[dag].Insert(plek, orders[bedrijf].Order);
+                    trucks.Item1.AddBedrijf(orders[bedrijf].Order, plek, dag);
                     break;
                 case 1:
                     plek = rng.Next(1, trucks.Item2.Dagen[dag].Count - 1);
                     trucks.Item2.Dagen[dag].Insert(plek, orders[bedrijf].Order);
+                    trucks.Item2.AddBedrijf(orders[bedrijf].Order, plek, dag);
                     break;
             }
             return trucks;
@@ -134,8 +139,11 @@ namespace Groot
                     plek = rng.Next(1, trucks.Item2.Dagen[dag].Count - 1);
                     if (trucks.Item2.Dagen[dag][plek] == 0 && count++ < 10)
                         goto case 1;
-                    if(trucks.Item2.Dagen[dag][plek] != 0)
+                    if (trucks.Item2.Dagen[dag][plek] != 0)
+                    {
                         trucks.Item2.Dagen[dag].RemoveAt(plek);
+                        trucks.Item2.RemoveBedrijf(plek, dag);
+                    }
                     break;
             }
             return trucks;
@@ -148,19 +156,36 @@ namespace Groot
             int plek1;
             int plek2;
             int plek1res;
+            int plek2res;
             switch (truck)
             {
                 case 0:
                     plek1 = rng.Next(1, trucks.Item1.Dagen[dag].Count - 1);
                     plek2 = rng.Next(1, trucks.Item1.Dagen[dag].Count - 1);
+
                     plek1res = trucks.Item1.Dagen[dag][plek1];
+                    plek2res = trucks.Item1.Dagen[dag][plek2];
+
+                    trucks.Item1.RemoveBedrijf(plek1, dag);
+                    trucks.Item1.RemoveBedrijf(plek2, dag);
+                    trucks.Item1.AddBedrijf(plek2res , plek1, dag);
+                    trucks.Item1.AddBedrijf(plek1res, plek2, dag);
+
                     trucks.Item1.Dagen[dag][plek1] = trucks.Item1.Dagen[dag][plek2];
                     trucks.Item1.Dagen[dag][plek2] = plek1res;
                     break;
                 case 1:
                     plek1 = rng.Next(1, trucks.Item2.Dagen[dag].Count - 1);
                     plek2 = rng.Next(1, trucks.Item2.Dagen[dag].Count - 1);
+
                     plek1res = trucks.Item2.Dagen[dag][plek1];
+                    plek2res = trucks.Item2.Dagen[dag][plek2];
+
+                    trucks.Item2.RemoveBedrijf(plek1, dag);
+                    trucks.Item2.RemoveBedrijf(plek2, dag);
+                    trucks.Item2.AddBedrijf(plek2res, plek1, dag);
+                    trucks.Item2.AddBedrijf(plek1res, plek2, dag);
+
                     trucks.Item2.Dagen[dag][plek1] = trucks.Item2.Dagen[dag][plek2];
                     trucks.Item2.Dagen[dag][plek2] = plek1res;
                     break;
@@ -177,10 +202,14 @@ namespace Groot
             {
                 case 0:
                     plek = rng.Next(1, trucks.Item1.Dagen[dag].Count);
+                    trucks.Item1.Value += 30 * 60;
+                    trucks.Item1.AddBedrijf(0, plek, dag);
                     trucks.Item1.Dagen[dag].Insert(plek, 0);
                     break;
                 case 1:
                     plek = rng.Next(1, trucks.Item2.Dagen[dag].Count);
+                    trucks.Item2.Value += 30 * 60;
+                    trucks.Item2.AddBedrijf(0, plek, dag);
                     trucks.Item2.Dagen[dag].Insert(plek, 0);
                     break;
             }
@@ -208,7 +237,10 @@ namespace Groot
                         {
                             if (count == plek)
                             {
+                                trucks.Item1.Value -= 30 * 60;
+                                trucks.Item1.RemoveBedrijf(plek, dag);
                                 trucks.Item1.Dagen[dag].RemoveAt(i);
+                                
                                 break;
                             }
                             count++;
@@ -227,6 +259,8 @@ namespace Groot
                         {
                             if (count == plek)
                             {
+                                trucks.Item2.Value -= 30 * 60;
+                                trucks.Item2.RemoveBedrijf(plek, dag);
                                 trucks.Item2.Dagen[dag].RemoveAt(i);
                                 break;
                             }
@@ -252,6 +286,7 @@ namespace Groot
             int plek1;
             int plek2;
             int plek1res;
+            int plek2res;
             int count = 0;
             switch (truck)
             {
@@ -263,6 +298,11 @@ namespace Groot
                     if (count < 10)
                     {
                         plek1res = trucks.Item1.Dagen[dag1][plek1];
+                        plek2res = trucks.Item1.Dagen[dag2][plek2];
+                        trucks.Item1.RemoveBedrijf(plek1, dag1);
+                        trucks.Item1.RemoveBedrijf(plek2, dag2);
+                        trucks.Item1.AddBedrijf(plek2res, plek1, dag1);
+                        trucks.Item1.AddBedrijf(plek1res, plek2, dag2);
                         trucks.Item1.Dagen[dag1][plek1] = trucks.Item1.Dagen[dag2][plek2];
                         trucks.Item1.Dagen[dag2][plek2] = plek1res;
                     }
@@ -275,6 +315,11 @@ namespace Groot
                     if (count < 10)
                     {
                         plek1res = trucks.Item2.Dagen[dag1][plek1];
+                        plek2res = trucks.Item2.Dagen[dag2][plek2];
+                        trucks.Item2.RemoveBedrijf(plek1, dag1);
+                        trucks.Item2.RemoveBedrijf(plek2, dag2);
+                        trucks.Item2.AddBedrijf(plek2res, plek1, dag1);
+                        trucks.Item2.AddBedrijf(plek1res, plek2, dag2);
                         trucks.Item2.Dagen[dag1][plek1] = trucks.Item2.Dagen[dag2][plek2];
                         trucks.Item2.Dagen[dag2][plek2] = plek1res;
                     }
@@ -334,8 +379,6 @@ namespace Groot
             }
             solution += addTijden(trucks.Item1);
             solution += addTijden(trucks.Item2);
-            if (solution > 690 * 2 * 5)
-                return solution * 10;
             return solution;
         }
 
@@ -344,9 +387,25 @@ namespace Groot
             double solution = 0;
             foreach (List<int> dagen in truck.Dagen)
             {
+                double vandaag = 0;
+                double lading = 0;
                 for (int i = 1; i < dagen.Count; i++)
                 {
                     int a = dagen[i-1], b = dagen[i];
+                    if (b != 0)
+                    {
+                        lading += ordersDict[b].AantContainers * ordersDict[b].VolumePerContainer;
+                        if (lading > 100000)
+                            solution += (100000 - lading) * 25;
+                        else
+                            vandaag += ordersDict[b].LedigingDuurMinuten * 60;
+                    }
+                    else
+                    {
+                        vandaag += 30 * 60;
+                        lading = 0;
+                    }
+                    
                     if (a == 0)
                         a = 287;
                     else
@@ -355,8 +414,13 @@ namespace Groot
                         b = 287;
                     else
                         b = ordersDict[b].MatrixID;
-                    solution += afstandenMatrix[a,b].Rijtijd;
+                    vandaag += afstandenMatrix[a, b].Rijtijd;
                 }
+                if(vandaag > 60 * 11.5 * 60)
+                {
+                    solution += 150 + ((vandaag - 60 * 60 * 11.5) / 30) * 150 * 60;
+                }
+                solution += vandaag;
             }
             return solution;
         }

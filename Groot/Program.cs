@@ -82,6 +82,7 @@ namespace Groot
     {
         public int Id;
         public List<int>[] Dagen;
+        public double Value;
 
         public Truck(int id)
         {
@@ -105,12 +106,76 @@ namespace Groot
             result.Dagen = Dagen.Take(Dagen.Length).ToArray();
             return result;
         }
+
+        public void RemoveBedrijf(int index, int dag)
+        {
+            int a, b, c;
+            if (index == 0)
+            {
+                a = 287;
+
+            }
+            else
+            {
+                a = LocalSearch.ordersDict[Dagen[dag][index - 1]].MatrixID;
+            }
+            if (Dagen[dag][index] == 0)
+                b = 287;
+            else
+                b = LocalSearch.ordersDict[Dagen[dag][index]].MatrixID;
+            if (Dagen[dag][index + 1] == 0)
+                c = 287;
+            else
+                c = LocalSearch.ordersDict[Dagen[dag][index + 1]].MatrixID;
+            Value -= LocalSearch.afstandenMatrix[a,b].Rijtijd;
+            Value -= LocalSearch.afstandenMatrix[b,c].Rijtijd;
+            if (Dagen[dag][index] == 0)
+                Value -= 30 * 60;
+            else
+                Value -= LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 60;
+            Value += LocalSearch.afstandenMatrix[a,c].Rijtijd;
+        }
+
+        public void AddBedrijf(int bedrijf, int index, int dag)
+        {
+            int a, b, c;
+            if(index == 0)
+            {
+                a = 287;
+                
+            }
+            else
+            {
+                a = LocalSearch.ordersDict[Dagen[dag][index - 1]].MatrixID;
+            }
+
+            if(bedrijf == 0)
+            {
+                b= 287;
+            }
+            else
+            {
+                b= LocalSearch.ordersDict[bedrijf].MatrixID;
+            }
+
+            if (Dagen[dag][index + 1] == 0)
+                c = 287;
+            else
+                c = LocalSearch.ordersDict[Dagen[dag][index + 1]].MatrixID;
+            Value += LocalSearch.afstandenMatrix[a, b].Rijtijd;
+            Value += LocalSearch.afstandenMatrix[b, c].Rijtijd;
+            if (bedrijf == 0)
+                Value += 30 * 60;
+            else
+                Value += LocalSearch.ordersDict[bedrijf].LedigingDuurMinuten * 60;
+            Value -= LocalSearch.afstandenMatrix[a,c].Rijtijd;
+        }
     }
 
     public class Solution
     {
         public Truck Item1, Item2;
-        public int Value;
+        public double Value;
 
         public Solution(Truck truck1, Truck truck2)
         {
