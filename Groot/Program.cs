@@ -263,10 +263,10 @@ namespace Groot
 
                 bool validNa = Parent.ValidCheck[bedrijf].Valid;
 
-                if (validVoor)
-                    ;// Value += LocalSearch.ordersDict[bedrijf].Frequentie * LocalSearch.ordersDict[bedrijf].LedigingDuurMinuten * 3 * 60;
-                else if (validNa)
-                    ;// Value -= LocalSearch.ordersDict[bedrijf].Frequentie * LocalSearch.ordersDict[bedrijf].LedigingDuurMinuten * 3 * 60;
+                if (validVoor && !validNa)
+                    Value += LocalSearch.ordersDict[bedrijf].Frequentie * LocalSearch.ordersDict[bedrijf].LedigingDuurMinuten * 3 * 6000;
+                else if (validNa && !validVoor)
+                    Value -= LocalSearch.ordersDict[bedrijf].Frequentie * LocalSearch.ordersDict[bedrijf].LedigingDuurMinuten * 3 * 6000;
             }
         }
 
@@ -318,10 +318,10 @@ namespace Groot
 
                 bool validNa = Parent.ValidCheck[Dagen[dag][index]].Valid;
 
-                if (validVoor)
-                    ;// Value += LocalSearch.ordersDict[Dagen[dag][index]].Frequentie * LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 3 * 60;
-                else if (validNa)
-                    ;// Value -= LocalSearch.ordersDict[Dagen[dag][index]].Frequentie * LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 3 * 60;
+                if (validVoor && !validNa)
+                    Value += LocalSearch.ordersDict[bedrijf].Frequentie * LocalSearch.ordersDict[bedrijf].LedigingDuurMinuten * 3 * 6000;
+                else if (validNa && !validVoor)
+                    Value -= LocalSearch.ordersDict[bedrijf].Frequentie * LocalSearch.ordersDict[bedrijf].LedigingDuurMinuten * 3 * 6000;
             }
 
             // Remove from list
@@ -537,7 +537,7 @@ namespace Groot
                 {
                     case 1:
                         int count = 0;
-                        for (int i = 0; i < 0; i++)
+                        for (int i = 0; i < 5; i++)
                             if (this[i] == 1)
                                 count++;
                             else if (this[i] > 1)
@@ -549,7 +549,7 @@ namespace Groot
                         return this[0] == 1 && this[1] == 0 && this[2] == 1 && this[3] == 0 && this[4] == 1;
                     case 4:
                         count = 0;
-                        for (int i = 0; i < 0; i++)
+                        for (int i = 0; i < 5; i++)
                             if (this[i] == 1)
                                 count++;
                             else if (this[i] > 1)
@@ -565,12 +565,13 @@ namespace Groot
 
         public ValidArray(int a = 0, int b = 0, int c = 0, int d = 0, int e = 0, int f = 1)
         {
-            Dag1 = a; Dag2 = b; Dag3 = c; Dag4 = d; Dag5 = e;
+            Dag1 = a; Dag2 = b; Dag3 = c; Dag4 = d; Dag5 = e; Frequentie = f;
         }
 
         public ValidArray Copy()
         {
-            return new ValidArray(Dag1, Dag2, Dag3, Dag4, Dag5, Frequentie);
+            ValidArray res = new ValidArray(Dag1, Dag2, Dag3, Dag4, Dag5, Frequentie);
+            return res;
         }
 
         public int this[int key]

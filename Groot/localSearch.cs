@@ -9,8 +9,8 @@ namespace Groot
 {
     class LocalSearch
     {
-        int kmax = 10000;
-        double temp = 100d;
+        int kmax = 50000;
+        double temp = 1500;
         Random rng = new Random();
         Solution bestSolution;
         public static AfstandRijtijd[,] afstandenMatrix = null;
@@ -33,17 +33,17 @@ namespace Groot
                 currentSolution.ValidCheck[kvp.Key] = new ValidArray(f: kvp.Value.Frequentie);
             }
 
-            //currentSolution.Value = solutionValue(currentSolution);
+            currentSolution.Value = solutionValue(currentSolution);
 
             orders = ordersDict.Values.ToArray();
-            for (int i = 0; i < 200; i++)
+            /*for (int i = 0; i < 200; i++)
             {
                 int index = rng.Next(0, orders.Length);
                 currentSolution.Item1.AddBedrijf(orders[index].Order, i % 40, i / 40);
 
                 index = rng.Next(0, orders.Length);
                 currentSolution.Item2.AddBedrijf(orders[index].Order, i % 40, i / 40);
-            }
+            }*/
             
             bestSolution = currentSolution.Copy();
             for (int i = 0; i < kmax; i++)
@@ -55,10 +55,10 @@ namespace Groot
 
                 Solution randomNeighbor = newNeighbor(currentSolution);
 
-                if (randomNeighbor.Value > currentSolution.Value || acceptanceChance(currentSolution, randomNeighbor, temp) >= rng.NextDouble())
+                if (randomNeighbor.Value < currentSolution.Value || acceptanceChance(currentSolution, randomNeighbor, temp) >= rng.NextDouble())
                 {
                     currentSolution = randomNeighbor.Copy();
-                    if (currentSolution.Value > bestSolution.Value)
+                    if (currentSolution.Value < bestSolution.Value)
                     {
                         bestSolution = randomNeighbor.Copy();
                     }
@@ -69,7 +69,8 @@ namespace Groot
 
         double acceptanceChance(Solution currentSolution, Solution randomNeighbor, double temp)
         {
-            return Math.Exp((currentSolution.Value - randomNeighbor.Value) / temp );
+            double res = Math.Exp((currentSolution.Value - randomNeighbor.Value) / temp);
+            return res;
         }
 
         // TODO !!!
