@@ -319,9 +319,9 @@ namespace Groot
                 bool validNa = Parent.ValidCheck[Dagen[dag][index]].Valid;
 
                 if (validVoor && !validNa)
-                    Value += LocalSearch.ordersDict[bedrijf].Frequentie * LocalSearch.ordersDict[bedrijf].LedigingDuurMinuten * 3 * 6000;
+                    Value += LocalSearch.ordersDict[Dagen[dag][index]].Frequentie * LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 3 * 6000;
                 else if (validNa && !validVoor)
-                    Value -= LocalSearch.ordersDict[bedrijf].Frequentie * LocalSearch.ordersDict[bedrijf].LedigingDuurMinuten * 3 * 6000;
+                    Value -= LocalSearch.ordersDict[Dagen[dag][index]].Frequentie * LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 3 * 6000;
             }
 
             // Remove from list
