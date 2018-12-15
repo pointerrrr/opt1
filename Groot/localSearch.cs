@@ -33,7 +33,7 @@ namespace Groot
                 currentSolution.ValidCheck[kvp.Key] = new ValidArray(f: kvp.Value.Frequentie);
             }
 
-            currentSolution.Item1.Value = solutionValue(currentSolution);
+            //currentSolution.Value = solutionValue(currentSolution);
 
             orders = ordersDict.Values.ToArray();
             for (int i = 0; i < 200; i++)
@@ -55,10 +55,10 @@ namespace Groot
 
                 Solution randomNeighbor = newNeighbor(currentSolution);
 
-                if (randomNeighbor.Value < currentSolution.Value || acceptanceChance(currentSolution, randomNeighbor, temp) >= rng.NextDouble())
+                if (randomNeighbor.Value > currentSolution.Value || acceptanceChance(currentSolution, randomNeighbor, temp) >= rng.NextDouble())
                 {
                     currentSolution = randomNeighbor.Copy();
-                    if (currentSolution.Value < bestSolution.Value)
+                    if (currentSolution.Value > bestSolution.Value)
                     {
                         bestSolution = randomNeighbor.Copy();
                     }
@@ -86,19 +86,19 @@ namespace Groot
                     removeBedrijf(result);
                     break;
                 case 2:
-                    swapOrder(result);
+                    //swapOrder(result);
                     break;
                 case 3:
-                    addDumpen(result);
+                    //addDumpen(result);
                     break;
                 case 4:
-                    removeDumpen(result);
+                    //removeDumpen(result);
                     break;
                 case 5:
-                    changeOrderDay(result);
+                    //changeOrderDay(result);
                     break;
                 case 6:
-                    changeOrderTruck(result);
+                    //changeOrderTruck(result);
                     break;
             }
             return result;
