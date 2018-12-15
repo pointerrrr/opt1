@@ -86,13 +86,13 @@ namespace Groot
                     removeBedrijf(result);
                     break;
                 case 2:
-                    //swapOrder(result);
+                    swapOrder(result);
                     break;
                 case 3:
-                    //addDumpen(result);
+                    addDumpen(result);
                     break;
                 case 4:
-                    //removeDumpen(result);
+                    removeDumpen(result);
                     break;
                 case 5:
                     //changeOrderDay(result);
