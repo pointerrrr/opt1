@@ -15,7 +15,7 @@ namespace Groot
 
             LocalSearch search = new LocalSearch();
 
-            search.FindSolution(trucks);
+            trucks = search.FindSolution(trucks);
 
             printSolution(trucks);
 
@@ -111,9 +111,18 @@ namespace Groot
         public Truck Copy()
         {
             Truck result = new Truck(Id);
-            result.Dagen = Dagen.Take(Dagen.Length).ToArray();
+            for (int i = 0; i < 5; i++)
+            {
+                result.Dagen[i] = new List<int>();
+                for (int j = 0; j < Dagen[i].Count; j++)
+                    result.Dagen[i].Add(Dagen[i][j]);
+            }
+            bool a = Dagen[0].Count > 100;
+            if (a)
+                ;
             if (Parent != null)
                 result.Parent = Parent;
+            result.Value = Value;
             return result;
         }
 
@@ -130,11 +139,11 @@ namespace Groot
             double maxRijTijd = 3600 * 11.5;
 
             if (previousRijTijd < maxRijTijd && newRijTijd > maxRijTijd)
-                Value += 150 + ((newRijTijd - maxRijTijd) / 30) * 150 * 60;
+                Value += 150 + ((newRijTijd - maxRijTijd) / (30*60)) * 150;
             else if (previousRijTijd > maxRijTijd && newRijTijd < maxRijTijd)
-                Value -= 150 + ((previousRijTijd - maxRijTijd) / 30) * 150 * 60;
+                Value -= 150 + ((previousRijTijd - maxRijTijd) / (30*60)) * 150;
             else if (previousRijTijd > maxRijTijd && newRijTijd > maxRijTijd)
-                Value += ((newRijTijd - maxRijTijd) / 30) * 150 * 60 - ((previousRijTijd - maxRijTijd) / 30) * 150 * 60;
+                Value += ((newRijTijd - maxRijTijd) / (30*60)) * 150 * 60 - ((previousRijTijd - maxRijTijd) / (30*60)) * 150;
         }
 
         public void ChangeCapaciteit(int voor, int na)
@@ -458,6 +467,8 @@ namespace Groot
 
         public Dictionary<int, ValidArray> ValidCheck;
 
+        private double value;
+
         public double Value
         {
             get
@@ -475,9 +486,18 @@ namespace Groot
             Item2.Parent = this;
         }
 
+        public Solution(Truck truck1, Truck truck2, Dictionary<int, ValidArray> validCheck)
+        {
+            ValidCheck = new Dictionary<int, ValidArray>(validCheck);
+            Item1 = truck1.Copy();
+            Item1.Parent = this;
+            Item2 = truck2.Copy();
+            Item2.Parent = this;
+        }
+
         public Solution Copy()
         {
-            Solution result = new Solution(Item1,Item2);
+            Solution result = new Solution(Item1,Item2, ValidCheck);
             result.ValidCheck = new Dictionary<int, ValidArray>(ValidCheck);
             return result;
         }

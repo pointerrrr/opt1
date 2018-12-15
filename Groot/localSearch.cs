@@ -9,7 +9,7 @@ namespace Groot
 {
     class LocalSearch
     {
-        int kmax = 100000;
+        int kmax = 10000;
         double temp = 100d;
         Random rng = new Random();
         Solution bestSolution;
@@ -27,13 +27,14 @@ namespace Groot
 
         public Solution FindSolution(Solution trucks)
         {
-            Solution currentSolution = new Solution(trucks.Item1.Copy(), trucks.Item2.Copy());
+            Solution currentSolution = new Solution(trucks.Item1, trucks.Item2);
             foreach(KeyValuePair<int,OrderDescription> kvp in ordersDict)
             {
                 currentSolution.ValidCheck[kvp.Key] = new ValidArray(f: kvp.Value.Frequentie);
             }
 
-            bestSolution = currentSolution;
+            currentSolution.Item1.Value = solutionValue(currentSolution);
+
             orders = ordersDict.Values.ToArray();
             for (int i = 0; i < 1000; i++)
             {
@@ -43,26 +44,25 @@ namespace Groot
                 index = rng.Next(0, orders.Length);
                 currentSolution.Item2.AddBedrijf(orders[index].Order, i % 200, i / 200);
             }
-
+            
+            bestSolution = currentSolution.Copy();
             for (int i = 0; i < kmax; i++)
             {
-                if(i % 10000 == 0)
+                if(i % 1000 == 0)
                 {
                     temp *= 0.99d;
                 }
 
                 Solution randomNeighbor = newNeighbor(currentSolution);
 
-                if (acceptanceChance(currentSolution, randomNeighbor, temp) >= rng.NextDouble() || randomNeighbor.Value < currentSolution.Value)
+                if (randomNeighbor.Value < currentSolution.Value || acceptanceChance(currentSolution, randomNeighbor, temp) >= rng.NextDouble())
                 {
-                    currentSolution = randomNeighbor;
+                    currentSolution = randomNeighbor.Copy();
                     if (currentSolution.Value < bestSolution.Value)
                     {
-                        bestSolution = randomNeighbor;
+                        bestSolution = randomNeighbor.Copy();
                     }
-                }
-
-                
+                }                
             }
             return bestSolution;
         }
