@@ -36,13 +36,13 @@ namespace Groot
             currentSolution.Item1.Value = solutionValue(currentSolution);
 
             orders = ordersDict.Values.ToArray();
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 200; i++)
             {
                 int index = rng.Next(0, orders.Length);
-                currentSolution.Item1.AddBedrijf(orders[index].Order, i % 200, i / 200);
+                currentSolution.Item1.AddBedrijf(orders[index].Order, i % 40, i / 40);
 
                 index = rng.Next(0, orders.Length);
-                currentSolution.Item2.AddBedrijf(orders[index].Order, i % 200, i / 200);
+                currentSolution.Item2.AddBedrijf(orders[index].Order, i % 40, i / 40);
             }
             
             bestSolution = currentSolution.Copy();
