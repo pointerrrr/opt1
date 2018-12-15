@@ -9,10 +9,10 @@ namespace Groot
 {
     class LocalSearch
     {
-        int kmax = 10000000;
+        int kmax = 100000;
         double temp = 100d;
         Random rng = new Random();
-        Solution bestSolution = new Solution(new Truck(1), new Truck(2));
+        Solution bestSolution;
         public static AfstandRijtijd[,] afstandenMatrix = null;
         public static Dictionary<int, OrderDescription> ordersDict = null;
         public static OrderDescription[] orders = null;
@@ -28,6 +28,10 @@ namespace Groot
         public Solution FindSolution(Solution trucks)
         {
             Solution currentSolution = new Solution(trucks.Item1.Copy(), trucks.Item2.Copy());
+            foreach(KeyValuePair<int,OrderDescription> kvp in ordersDict)
+            {
+                currentSolution.ValidCheck[kvp.Key] = new ValidArray(f: kvp.Value.Frequentie);
+            }
 
             bestSolution = currentSolution;
             orders = ordersDict.Values.ToArray();
@@ -71,7 +75,7 @@ namespace Groot
         // TODO !!!
         Solution newNeighbor(Solution trucks)
         {
-            Solution result = new Solution(trucks.Item1.Copy(), trucks.Item2.Copy());
+            Solution result = trucks.Copy();
             int choice = rng.Next(7);
             switch(choice)
             {
