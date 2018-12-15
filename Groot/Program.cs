@@ -414,6 +414,9 @@ namespace Groot
             plek2 = rng.Next(0, Dagen[dag].Count - 1);
             plek2res = Dagen[dag][plek2];
 
+            if (plek1 == plek2)
+                return;
+
             RemoveBedrijf(plek1, dag);
             AddBedrijf(plek2res, plek1, dag);
 

@@ -95,10 +95,10 @@ namespace Groot
                     removeDumpen(result);
                     break;
                 case 5:
-                    //changeOrderDay(result);
+                    changeOrderDay(result);
                     break;
                 case 6:
-                    //changeOrderTruck(result);
+                    changeOrderTruck(result);
                     break;
             }
             return result;
