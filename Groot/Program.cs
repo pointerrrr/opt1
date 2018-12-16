@@ -19,7 +19,7 @@ namespace Groot
 
             printSolution(trucks);
 
-            Console.ReadLine();
+            //Console.ReadLine();
         }
 
 

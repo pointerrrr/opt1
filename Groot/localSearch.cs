@@ -9,7 +9,7 @@ namespace Groot
 {
     class LocalSearch
     {
-        int kmax = 50000;
+        int kmax = 1000000;
         double temp = 1500;
         Random rng = new Random();
         Solution bestSolution;
@@ -36,6 +36,7 @@ namespace Groot
             currentSolution.Strafpunten = solutionValue(currentSolution);
 
             orders = ordersDict.Values.ToArray();
+
             /*for (int i = 0; i < 200; i++)
             {
                 int index = rng.Next(0, orders.Length);
