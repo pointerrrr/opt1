@@ -166,11 +166,11 @@ namespace Groot
             double maxRijTijd = 3600 * 11.5;
 
             if (previousRijTijd < maxRijTijd && newRijTijd > maxRijTijd)
-                Strafpunten += 150 + ((newRijTijd - maxRijTijd) / (30*60)) * 150;
+                Strafpunten += 15000 + ((newRijTijd - maxRijTijd) / (30*60)) * 15000;
             else if (previousRijTijd > maxRijTijd && newRijTijd < maxRijTijd)
-                Strafpunten -= 150 + ((previousRijTijd - maxRijTijd) / (30 * 60)) * 150;
+                Strafpunten -= 15000 + ((previousRijTijd - maxRijTijd) / (30 * 60)) * 15000;
             else if (previousRijTijd > maxRijTijd && newRijTijd > maxRijTijd)
-                Strafpunten += (newRijTijd - previousRijTijd - maxRijTijd) / (30 * 60 * 150 * 60); 
+                Strafpunten += (((newRijTijd - previousRijTijd) - maxRijTijd) / (30 * 60)) * 15000; 
         }
 
         public void ChangeRijTijdRemove(int dag, int a, int b, int c)
@@ -186,11 +186,11 @@ namespace Groot
             double maxRijTijd = 3600 * 11.5;
 
             if (previousRijTijd < maxRijTijd && newRijTijd > maxRijTijd)
-                Strafpunten += 150 + (newRijTijd - maxRijTijd) / (30 * 60) * 150;
+                Strafpunten += 15000 + ((newRijTijd - maxRijTijd) / (30 * 60)) * 15000;
             else if (previousRijTijd > maxRijTijd && newRijTijd < maxRijTijd)
-                Strafpunten -= 150 + (previousRijTijd - maxRijTijd) / (30 * 60) * 150;
+                Strafpunten -= 15000 + ((previousRijTijd - maxRijTijd) / (30 * 60)) * 15000;
             else if (previousRijTijd > maxRijTijd && newRijTijd > maxRijTijd)
-                Strafpunten += (newRijTijd - previousRijTijd - maxRijTijd) / (30 * 60 * 150 * 60);
+                Strafpunten += (((newRijTijd - previousRijTijd) - maxRijTijd) / (30 * 60)) * 15000;
         }
 
         public void ChangeCapaciteit(int voor, int na)
@@ -198,11 +198,11 @@ namespace Groot
             int max = 100000;
 
             if (voor < max && na > max)
-                Strafpunten += 25 * (na - max);
+                Strafpunten += 250 * (na - max);
             else if (voor > max && na < max)
-                Strafpunten -= 25 * (voor - max);
+                Strafpunten -= 250 * (voor - max);
             else if (voor > max && na > max)
-                Strafpunten += 25 * (na - voor - max);
+                Strafpunten += 250 * ((na - voor) - max);
         }
 
         public int CheckCapacity(int dag, int index)

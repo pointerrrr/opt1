@@ -17,7 +17,7 @@ namespace Groot
         public static Dictionary<int, OrderDescription> ordersDict = null;
         public static OrderDescription[] orders = null;
         private double MaxPenalty;
-        private bool emptyStart = true;
+        private bool emptyStart = false;
 
         public LocalSearch()
         {
