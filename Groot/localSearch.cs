@@ -17,6 +17,7 @@ namespace Groot
         public static Dictionary<int, OrderDescription> ordersDict = null;
         public static OrderDescription[] orders = null;
         private double MaxPenalty;
+        private bool emptyStart = true;
 
         public LocalSearch()
         {
@@ -37,14 +38,15 @@ namespace Groot
 
             orders = ordersDict.Values.ToArray();
 
-            /*for (int i = 0; i < 200; i++)
-            {
-                int index = rng.Next(0, orders.Length);
-                currentSolution.Item1.AddBedrijf(orders[index].Order, i % 40, i / 40);
+            if (!emptyStart)
+                for (int i = 0; i < 200; i++)
+                {
+                    int index = rng.Next(0, orders.Length);
+                    currentSolution.Item1.AddBedrijf(orders[index].Order, i % 40, i / 40);
 
-                index = rng.Next(0, orders.Length);
-                currentSolution.Item2.AddBedrijf(orders[index].Order, i % 40, i / 40);
-            }*/
+                    index = rng.Next(0, orders.Length);
+                    currentSolution.Item2.AddBedrijf(orders[index].Order, i % 40, i / 40);
+                }
             
             bestSolution = currentSolution.Copy();
             for (int i = 0; i < kmax; i++)
