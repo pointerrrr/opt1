@@ -91,14 +91,34 @@ namespace Groot
             {
                 return Parent.Value;
             }
+        }
+
+        public double Rijtijd
+        {
+            get
+            {
+                return Parent.Rijtijd;
+            }
             set
             {
-                Parent.Value = value;
+                Parent.Rijtijd = value;
             }
         }
+
+        public double Strafpunten
+        {
+            get
+            {
+                return Parent.Strafpunten;
+            }
+            set
+            {
+                Parent.Strafpunten = value;
+            }
+        }
+
         Random rng = new Random();
         
-
         public Truck(int id)
         {
             Id = id;
@@ -126,11 +146,10 @@ namespace Groot
                 for (int j = 0; j < Dagen[i].Count; j++)
                     result.Dagen[i].Add(Dagen[i][j]);
             }
-            bool a = Dagen[0].Count > 100;
-            if (a)
-                ;
+
             if (Parent != null)
                 result.Parent = Parent;
+
             return result;
         }
 
@@ -147,11 +166,11 @@ namespace Groot
             double maxRijTijd = 3600 * 11.5;
 
             if (previousRijTijd < maxRijTijd && newRijTijd > maxRijTijd)
-                ;//Value += 150 + ((newRijTijd - maxRijTijd) / (30*60)) * 150;
+                ;// Strafpunten += 150 + ((newRijTijd - maxRijTijd) / (30*60)) * 150;
             else if (previousRijTijd > maxRijTijd && newRijTijd < maxRijTijd)
-                ;// Value -= 150 + ((previousRijTijd - maxRijTijd) / (30 * 60)) * 150;
+                ;// Strafpunten -= 150 + ((previousRijTijd - maxRijTijd) / (30 * 60)) * 150;
             else if (previousRijTijd > maxRijTijd && newRijTijd > maxRijTijd)
-                ;// Value += ((newRijTijd - maxRijTijd) / (30 * 60)) * 150 * 60 - ((previousRijTijd - maxRijTijd) / (30 * 60)) * 150;
+                ;// Strafpunten += ((newRijTijd - maxRijTijd) / (30 * 60)) * 150 * 60 - ((previousRijTijd - maxRijTijd) / (30 * 60)) * 150;
         }
 
         public void ChangeRijTijdRemove(int dag, int a, int b, int c)
@@ -167,11 +186,11 @@ namespace Groot
             double maxRijTijd = 3600 * 11.5;
 
             if (previousRijTijd < maxRijTijd && newRijTijd > maxRijTijd)
-                ;//Value += 150 + ((newRijTijd - maxRijTijd) / (30*60)) * 150;
+                ;// Strafpunten += 150 + ((newRijTijd - maxRijTijd) / (30*60)) * 150;
             else if (previousRijTijd > maxRijTijd && newRijTijd < maxRijTijd)
-                ;// Value -= 150 + ((previousRijTijd - maxRijTijd) / (30 * 60)) * 150;
+                ;// Strafpunten -= 150 + ((previousRijTijd - maxRijTijd) / (30 * 60)) * 150;
             else if (previousRijTijd > maxRijTijd && newRijTijd > maxRijTijd)
-                ;// Value += ((newRijTijd - maxRijTijd) / (30 * 60)) * 150 * 60 - ((previousRijTijd - maxRijTijd) / (30 * 60)) * 150;
+                ;// Strafpunten += ((newRijTijd - maxRijTijd) / (30 * 60)) * 150 * 60 - ((previousRijTijd - maxRijTijd) / (30 * 60)) * 150;
         }
 
         public void ChangeCapaciteit(int voor, int na)
@@ -179,11 +198,11 @@ namespace Groot
             int max = 100000;
 
             if (voor < max && na > max)
-                ;// Value += 25 * (na - max);
+                ;// Strafpunten += 25 * (na - max);
             else if (voor > max && na < max)
-                ;// Value -= 25 * (voor - max);
+                ;// Strafpunten -= 25 * (voor - max);
             else if (voor > max && na > max)
-                ;// Value += 25 * (na - max) - 25 * (voor - max);
+                ;// Strafpunten += 25 * (na - max) - 25 * (voor - max);
         }
 
         public int CheckCapacity(int dag, int index)
@@ -231,14 +250,14 @@ namespace Groot
                 c = LocalSearch.ordersDict[Dagen[dag][index]].MatrixID;
 
             // Calculate new Cost Value
-            Value += LocalSearch.afstandenMatrix[a, b].Rijtijd;
-            Value += LocalSearch.afstandenMatrix[b, c].Rijtijd;
-            Value -= LocalSearch.afstandenMatrix[a, c].Rijtijd;
+            Rijtijd += LocalSearch.afstandenMatrix[a, b].Rijtijd;
+            Rijtijd += LocalSearch.afstandenMatrix[b, c].Rijtijd;
+            Rijtijd -= LocalSearch.afstandenMatrix[a, c].Rijtijd;
 
             if (bedrijf == 0)
-                Value += 30 * 60;
+                Rijtijd += 30 * 60;
             else
-                Value += LocalSearch.ordersDict[bedrijf].LedigingDuurMinuten * 60;
+                Rijtijd += LocalSearch.ordersDict[bedrijf].LedigingDuurMinuten * 60;
 
             ChangeRijTijdAdd(dag, a, b, c);
 
@@ -264,9 +283,9 @@ namespace Groot
                 bool validNa = Parent.ValidCheck[bedrijf].Valid;
 
                 if (validVoor && !validNa)
-                    Value += LocalSearch.ordersDict[bedrijf].Frequentie * LocalSearch.ordersDict[bedrijf].LedigingDuurMinuten * 3 * 6000;
+                    Strafpunten += LocalSearch.ordersDict[bedrijf].Frequentie * LocalSearch.ordersDict[bedrijf].LedigingDuurMinuten * 3d * 60d;
                 else if (validNa && !validVoor)
-                    Value -= LocalSearch.ordersDict[bedrijf].Frequentie * LocalSearch.ordersDict[bedrijf].LedigingDuurMinuten * 3 * 6000;
+                    Strafpunten -= LocalSearch.ordersDict[bedrijf].Frequentie * LocalSearch.ordersDict[bedrijf].LedigingDuurMinuten * 3d * 60d;
             }
         }
 
@@ -296,14 +315,14 @@ namespace Groot
                 c = LocalSearch.ordersDict[Dagen[dag][index + 1]].MatrixID;
 
             // Calculate new Cost Value
-            Value -= LocalSearch.afstandenMatrix[a, b].Rijtijd;
-            Value -= LocalSearch.afstandenMatrix[b, c].Rijtijd;
-            Value += LocalSearch.afstandenMatrix[a, c].Rijtijd;
+            Rijtijd -= LocalSearch.afstandenMatrix[a, b].Rijtijd;
+            Rijtijd -= LocalSearch.afstandenMatrix[b, c].Rijtijd;
+            Rijtijd += LocalSearch.afstandenMatrix[a, c].Rijtijd;
 
             if (Dagen[dag][index] == 0)
-                Value -= 30 * 60;
+                Rijtijd -= 30 * 60;
             else
-                Value -= LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 60;
+                Rijtijd -= LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 60;
 
             ChangeRijTijdRemove(dag, a, b, c);
 
@@ -314,14 +333,14 @@ namespace Groot
 
                 bool validVoor = Parent.ValidCheck[Dagen[dag][index]].Valid;
 
-                Parent.ValidCheck[LocalSearch.ordersDict[Dagen[dag][index]].Order][dag]--;
+                Parent.ValidCheck[Dagen[dag][index]][dag]--;
 
                 bool validNa = Parent.ValidCheck[Dagen[dag][index]].Valid;
 
                 if (validVoor && !validNa)
-                    Value += LocalSearch.ordersDict[Dagen[dag][index]].Frequentie * LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 3 * 6000;
+                    Strafpunten += LocalSearch.ordersDict[Dagen[dag][index]].Frequentie * LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 3d * 60d;
                 else if (validNa && !validVoor)
-                    Value -= LocalSearch.ordersDict[Dagen[dag][index]].Frequentie * LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 3 * 6000;
+                    Strafpunten -= LocalSearch.ordersDict[Dagen[dag][index]].Frequentie * LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 3d * 60d;
             }
 
             // Remove from list
@@ -437,8 +456,8 @@ namespace Groot
             int dag1 = rng.Next(5);
             int dag2 = rng.Next(5);
 
-            while (dag1 == dag2)
-                dag2 = rng.Next(5);
+            if (dag1 == dag2)
+                return;
 
             plek1 = rng.Next(0, Dagen[dag1].Count - 1);
             plek2 = rng.Next(0, Dagen[dag2].Count - 1);
@@ -495,7 +514,9 @@ namespace Groot
 
         public Dictionary<int, ValidArray> ValidCheck;
 
-        public double Value;
+        public double Value { get { return Rijtijd + Strafpunten; } }
+
+        public double Rijtijd, Strafpunten;
         
         public Solution(Truck truck1, Truck truck2)
         {
@@ -504,7 +525,7 @@ namespace Groot
             Item1.Parent = this;
             Item2 = truck2.Copy();
             Item2.Parent = this;
-            this.Value = 18000;
+            Rijtijd = 18000;
         }
 
         public Solution(Truck truck1, Truck truck2, Dictionary<int, ValidArray> validCheck)
@@ -519,8 +540,14 @@ namespace Groot
         public Solution Copy()
         {
             Solution result = new Solution(Item1,Item2, ValidCheck);
-            result.ValidCheck = new Dictionary<int, ValidArray>(ValidCheck);
-            result.Value = Value;
+
+            result.ValidCheck = new Dictionary<int, ValidArray>();
+            KeyValuePair<int, ValidArray>[] copy = ValidCheck.ToArray();
+            foreach (KeyValuePair<int, ValidArray> kvp in copy)
+                result.ValidCheck[kvp.Key] = kvp.Value.Copy();
+
+            result.Rijtijd = Rijtijd;
+            result.Strafpunten = Strafpunten;
             return result;
         }
     }

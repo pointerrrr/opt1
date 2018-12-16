@@ -33,7 +33,7 @@ namespace Groot
                 currentSolution.ValidCheck[kvp.Key] = new ValidArray(f: kvp.Value.Frequentie);
             }
 
-            currentSolution.Value = solutionValue(currentSolution);
+            currentSolution.Strafpunten = solutionValue(currentSolution);
 
             orders = ordersDict.Values.ToArray();
             /*for (int i = 0; i < 200; i++)
