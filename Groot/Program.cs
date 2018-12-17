@@ -15,11 +15,21 @@ namespace Groot
 
             LocalSearch search = new LocalSearch();
 
+            if (args.Length != 0)
+            {
+                search.kmax = int.Parse(args[0]);
+                search.temp = double.Parse(args[1]);
+                search.tempDecrease = int.Parse(args[2]);
+                search.aantalBedrijvenStart = int.Parse(args[3]);
+            }
+
             trucks = search.FindSolution(trucks);
 
             printSolution(trucks);
 
+#if DEBUG
             //Console.ReadLine();
+#endif
         }
 
 
@@ -169,14 +179,7 @@ namespace Groot
 
             double newRijTijd = RijTijden[dag];
 
-            double maxRijTijd = 3600 * 11.5;
-
-            if (previousRijTijd <= maxRijTijd && newRijTijd > maxRijTijd)
-                Strafpunten += overloadstraf * (newRijTijd - maxRijTijd) + overloadstraf;
-            else if (previousRijTijd > maxRijTijd && newRijTijd <= maxRijTijd)
-                Strafpunten -= overloadstraf * (previousRijTijd - maxRijTijd) + overloadstraf;
-            else if (previousRijTijd > maxRijTijd && newRijTijd > maxRijTijd)
-                Strafpunten += overloadstraf * (newRijTijd - previousRijTijd);
+            doStrafPuntenVoorRijTijd(previousRijTijd, newRijTijd);
         }
 
         public void ChangeRijTijdRemove(int dag, int a, int b, int c)
@@ -189,17 +192,26 @@ namespace Groot
 
             double newRijTijd = RijTijden[dag];
 
+            doStrafPuntenVoorRijTijd(previousRijTijd, newRijTijd);
+        }
+
+        void doStrafPuntenVoorRijTijd(double previousRijTijd, double newRijTijd)
+        {
             double maxRijTijd = 3600 * 11.5;
-
-            if (previousRijTijd == newRijTijd)
-                return;
-
+            double minRijTijd = 3600 * 2;
             if (previousRijTijd <= maxRijTijd && newRijTijd > maxRijTijd)
                 Strafpunten += overloadstraf * (newRijTijd - maxRijTijd) + overloadstraf;
             else if (previousRijTijd > maxRijTijd && newRijTijd <= maxRijTijd)
                 Strafpunten -= overloadstraf * (previousRijTijd - maxRijTijd) + overloadstraf;
             else if (previousRijTijd > maxRijTijd && newRijTijd > maxRijTijd)
                 Strafpunten += overloadstraf * (newRijTijd - previousRijTijd);
+
+            if (previousRijTijd < minRijTijd && newRijTijd >= minRijTijd)
+                Strafpunten -= overloadstraf * (minRijTijd - previousRijTijd) + overloadstraf;
+            else if (previousRijTijd >= minRijTijd && newRijTijd < minRijTijd)
+                Strafpunten += overloadstraf * (minRijTijd - newRijTijd) + overloadstraf;
+            else if (previousRijTijd < minRijTijd && newRijTijd < minRijTijd)
+                Strafpunten += overloadstraf * (previousRijTijd - newRijTijd);
         }
 
         public void ChangeCapaciteit(int voor, int na)
@@ -207,11 +219,11 @@ namespace Groot
             int max = 100000;
 
             if (voor < max && na > max)
-                Strafpunten += 250 * (na - max);
+                Strafpunten += 10000 * (na - max) + 100000;
             else if (voor > max && na < max)
-                Strafpunten -= 250 * (voor - max);
+                Strafpunten -= 10000 * (voor - max) + 100000;
             else if (voor > max && na > max)
-                Strafpunten += 250 * (na - voor);
+                Strafpunten += 10000 * (na - voor);
         }
 
         public int CheckCapacity(int dag, int index)
@@ -574,25 +586,25 @@ namespace Groot
                     case 1:
                         int count = 0;
                         for (int i = 0; i < 5; i++)
-                            if (this[i] == 1)
+                            if (this[i] > 0)
                                 count++;
                             else if (this[i] > 1)
                                 return false;      
-                        return count == 1;
+                        return count > 0;
                     case 2:
-                        return (this[0] == 1 && this[1] == 0 && this[2] == 0 && this[3] == 1 && this[4] == 0) || (this[0] == 0 && this[1] == 1 && this[2] == 0 && this[3] == 0 && this[4] == 1);
+                        return (this[0] > 0 && this[1] == 0 && this[2] == 0 && this[3] > 0 && this[4] == 0) || (this[0] == 0 && this[1] > 0 && this[2] == 0 && this[3] == 0 && this[4] > 0);
                     case 3:
-                        return this[0] == 1 && this[1] == 0 && this[2] == 1 && this[3] == 0 && this[4] == 1;
+                        return this[0] > 0 && this[1] == 0 && this[2] > 0 && this[3] == 0 && this[4] > 0;
                     case 4:
                         count = 0;
                         for (int i = 0; i < 5; i++)
-                            if (this[i] == 1)
+                            if (this[i] > 0)
                                 count++;
                             else if (this[i] > 1)
                                 return false;
                         return count == 4;
                     case 5:
-                        return this[0] == 1 && this[1] == 1 && this[2] == 1 && this[3] == 1 && this[4] == 1;
+                        return this[0] > 0 && this[1] > 0 && this[2] > 0 && this[3] > 0 && this[4] > 0;
                     default:
                         return false;
                 }

@@ -9,15 +9,17 @@ namespace Groot
 {
     class LocalSearch
     {
-        int kmax = 1000000;
-        double temp = 1500;
+        public int kmax = 10000000;
+        public double temp = 1500;
+        public int tempDecrease = 10000;
+        public int aantalBedrijvenStart = 1000;
         Random rng = new Random();
         Solution bestSolution;
         public static AfstandRijtijd[,] afstandenMatrix = null;
         public static Dictionary<int, OrderDescription> ordersDict = null;
         public static OrderDescription[] orders = null;
         private double MaxPenalty;
-        private bool emptyStart = true;
+        private bool emptyStart = false;
         int ordersToAddAtStart = 200;
 
         public LocalSearch()
@@ -25,6 +27,28 @@ namespace Groot
             inladen();
             orders = ordersDict.Values.ToArray();
             MaxPenalty = solutionValue(new Solution(new Truck(1), new Truck(2)));
+        }
+
+        int[] closestBedrijven(int aantal, int matrixID)
+        {
+            int[] res = new int[aantal];
+            List<Tuple<int,AfstandRijtijd>> pres = new List<Tuple<int, AfstandRijtijd>>();
+            for (int i = 0; i < 1099; i++)
+                pres.Add (new Tuple<int, AfstandRijtijd>(i, afstandenMatrix[matrixID, i]));
+
+            Comparison<Tuple<int, AfstandRijtijd>> comp = (a,b) => { return a.Item2.Rijtijd - b.Item2.Rijtijd; };
+
+            pres.Sort(comp);
+            pres.RemoveAt(0);
+
+            Tuple<int, AfstandRijtijd>[] array = null;
+            array = pres.Take(aantal).ToArray();
+            for(int i = 0; i < array.Length; i++)
+            {
+                res[i] = orders.First((o) => { return o.MatrixID == array[i].Item1; }).Order;
+            }
+
+            return res;
         }
 
         public Solution FindSolution(Solution trucks)
@@ -36,23 +60,45 @@ namespace Groot
             }
 
             currentSolution.Strafpunten = MaxPenalty;
+            currentSolution.Strafpunten += 1500000;
 
             orders = ordersDict.Values.ToArray();
 
             if (!emptyStart)
-                for (int i = 0; i < ordersToAddAtStart; i++)
+            /*for (int i = 0; i < ordersToAddAtStart; i++)
+            {
+                int index = rng.Next(0, orders.Length);
+                currentSolution.Item1.AddBedrijf(orders[index].Order, i % (ordersToAddAtStart / 5), i / (ordersToAddAtStart / 5));
+
+                index = rng.Next(0, orders.Length);
+                currentSolution.Item2.AddBedrijf(orders[index].Order, i % (ordersToAddAtStart / 5), i / (ordersToAddAtStart / 5));
+            }*/
+            {
+                for(int i = 0; i < 5; i++)
                 {
                     int index = rng.Next(0, orders.Length);
-                    currentSolution.Item1.AddBedrijf(orders[index].Order, i % (ordersToAddAtStart / 5), i / (ordersToAddAtStart / 5));
+                    currentSolution.Item1.AddBedrijf( orders[index].Order, 0, i );
 
                     index = rng.Next(0, orders.Length);
-                    currentSolution.Item2.AddBedrijf(orders[index].Order, i % (ordersToAddAtStart / 5), i / (ordersToAddAtStart / 5));
+                    currentSolution.Item2.AddBedrijf(orders[index].Order, 0, i);
+
+                    int[] closest1 = closestBedrijven(aantalBedrijvenStart, ordersDict[currentSolution.Item1.Dagen[i][0]].MatrixID);
+                    int[] closest2 = closestBedrijven(aantalBedrijvenStart, ordersDict[currentSolution.Item2.Dagen[i][0]].MatrixID);
+                    for (int j = 0; j < aantalBedrijvenStart; j++)
+                    {
+                        currentSolution.Item1.AddBedrijf(closest1[j], j + 1, i);
+                        currentSolution.Item2.AddBedrijf(closest2[j], j + 1, i);
+
+
+                    }
+
                 }
+            }
             
             bestSolution = currentSolution.Copy();
             for (int i = 0; i < kmax; i++)
             {
-                if(i % 1000 == 0)
+                if(i % tempDecrease == 0)
                 {
                     temp *= 0.99d;
                 }
@@ -66,7 +112,7 @@ namespace Groot
                     {
                         bestSolution = randomNeighbor.Copy();
                     }
-                }                
+                }
             }
             return bestSolution;
         }
