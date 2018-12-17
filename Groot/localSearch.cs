@@ -9,12 +9,13 @@ namespace Groot
 {
     class LocalSearch
     {
-        public int kmax = 10000000;
-        public double temp = 1500;
-        public int tempDecrease = 10000;
-        public int aantalBedrijvenStart = 1000;
-        //public string startOplossing = null;
-        public string startOplossing = @"out.txt";
+        public int kmax = 1000000;
+        public double temp = 500000000;
+        double startTemp = 0;
+        public int tempDecrease = 100;
+        public int aantalBedrijvenStart = 0;
+        public string startOplossing = null;
+        //public string startOplossing = @"out.txt";
 
         public static AfstandRijtijd[,] afstandenMatrix = null;
         public static Dictionary<int, OrderDescription> ordersDict = null;
@@ -54,8 +55,39 @@ namespace Groot
             return res;
         }
 
+        void addCloud(Solution currentSolution)
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                int index = rng.Next(0, orders.Length);
+                currentSolution.Item1.AddBedrijf(orders[index].Order, 0, i);
+
+                index = rng.Next(0, orders.Length);
+                currentSolution.Item2.AddBedrijf(orders[index].Order, 0, i);
+
+
+                int[] closest1 = closestBedrijven(1177, ordersDict[currentSolution.Item1.Dagen[i][0]].MatrixID);
+                int[] closest2 = closestBedrijven(1177, ordersDict[currentSolution.Item2.Dagen[i][0]].MatrixID);
+                int j = 0;
+                while(currentSolution.Item1.RijTijden[i] < 36000-1800)
+                {
+                    currentSolution.Item1.AddBedrijf(closest1[j], j + 1, i);
+                    j++;
+                }
+                j = 0;
+                while (currentSolution.Item2.RijTijden[i] < 36000-1800)
+                {
+                    currentSolution.Item2.AddBedrijf(closest2[j], j + 1, i);
+                    j++;
+                }
+                currentSolution.Item1.AddBedrijf(0, aantalBedrijvenStart + 1, i);
+                currentSolution.Item2.AddBedrijf(0, aantalBedrijvenStart + 1, i);
+            }
+        }
+
         public Solution FindSolution(Solution trucks)
         {
+            startTemp = temp;
             Solution currentSolution = trucks.Copy();
             foreach(KeyValuePair<int,OrderDescription> kvp in ordersDict)
             {
@@ -63,12 +95,14 @@ namespace Groot
             }
 
             currentSolution.Strafpunten = MaxPenalty;
-            currentSolution.Strafpunten += 1500000;
-
+            
             orders = ordersDict.Values.ToArray();
 
             if (startOplossing != null)
+            {
                 startOplossingInladen(startOplossing, currentSolution);
+                addCloud(currentSolution);
+            }
             else if (!emptyStart)
             /*for (int i = 0; i < aantalBedrijvenStart; i++)
             {
@@ -79,30 +113,26 @@ namespace Groot
                 currentSolution.Item2.AddBedrijf(orders[index].Order, i % (aantalBedrijvenStart / 5), i / (aantalBedrijvenStart / 5));
             }*/
             {
-                for (int i = 0; i < 5; i++)
-                {
-                    int index = rng.Next(0, orders.Length);
-                    currentSolution.Item1.AddBedrijf( orders[index].Order, 0, i );
-
-                    index = rng.Next(0, orders.Length);
-                    currentSolution.Item2.AddBedrijf(orders[index].Order, 0, i);
-
-                    int[] closest1 = closestBedrijven(aantalBedrijvenStart, ordersDict[currentSolution.Item1.Dagen[i][0]].MatrixID);
-                    int[] closest2 = closestBedrijven(aantalBedrijvenStart, ordersDict[currentSolution.Item2.Dagen[i][0]].MatrixID);
-                    for (int j = 0; j < aantalBedrijvenStart; j++)
-                    {
-                        currentSolution.Item1.AddBedrijf(closest1[j], j + 1, i);
-                        currentSolution.Item2.AddBedrijf(closest2[j], j + 1, i);
-
-
-                    }
-
-                }
+                addCloud(currentSolution);
             }
-            
+
+            return currentSolution;
+
+            int count = 0;
+            int untilStopped = 0;
             bestSolution = currentSolution.Copy();
+            setTemp:
+            temp = startTemp;            
             for (int i = 0; i < kmax; i++)
             {
+                /*if (count++ < 1)
+                {
+                    addCloud(bestSolution);
+                    currentSolution = bestSolution.Copy();
+                        
+                    untilStopped = 0;
+                    goto setTemp;
+                }*/
                 if(i % tempDecrease == 0)
                 {
                     temp *= 0.99d;
@@ -116,15 +146,32 @@ namespace Groot
                     if (currentSolution.Value < bestSolution.Value)
                     {
                         bestSolution = randomNeighbor.Copy();
+                        untilStopped = 0;
                     }
                 }
+                
             }
+            if (count++ < 0)
+                goto setTemp;
             return bestSolution;
         }
 
+        int countChance = 0;
+        double[] test = new double[1000];
         double acceptanceChance(Solution currentSolution, Solution randomNeighbor, double temp)
         {
+            
+            
             double res = Math.Exp((currentSolution.Value - randomNeighbor.Value) / temp);
+            if (countChance < 1000)
+            {
+                test[countChance++] = res;
+                
+            }
+            else
+            {
+                double testres = test.Sum() / 1000d;
+            }
             return res;
         }
 
@@ -278,53 +325,12 @@ namespace Groot
                 if (!orderVoldaan(trucks, order))
                     solution += order.LedigingDuurMinuten * order.Frequentie * 3d * 60d;
             }
-            solution += addTijden(trucks.Item1);
-            solution += addTijden(trucks.Item2);
-            return solution;
-        }
 
-        static double addTijden(Truck truck)
-        {
-            double solution = 0;
-            foreach (List<int> dagen in truck.Dagen)
-            {
-                double vandaag = 0;
-                double lading = 0;
-                for (int i = 1; i < dagen.Count; i++)
-                {
-                    int a = dagen[i-1], b = dagen[i];
-                    if (b != 0)
-                    {
-                        lading += ordersDict[b].AantContainers * ordersDict[b].VolumePerContainer;
-                        if (lading > 100000)
-                            solution += (100000 - lading) * 25;
-                        else
-                            vandaag += ordersDict[b].LedigingDuurMinuten * 60;
-                    }
-                    else
-                    {
-                        vandaag += 30 * 60;
-                        lading = 0;
-                    }
-                    
-                    if (a == 0)
-                        a = 287;
-                    else
-                        a = ordersDict[a].MatrixID;
-                    if (b == 0)
-                        b = 287;
-                    else
-                        b = ordersDict[b].MatrixID;
-                    vandaag += afstandenMatrix[a, b].Rijtijd;
-                }
-                if(vandaag > 60 * 11.5 * 60)
-                {
-                    solution += 150 + ((vandaag - 60 * 60 * 11.5) / 30) * 150 * 60;
-                }
-                solution += vandaag;
-            }
+            solution += 36000d * 150000d * 10;
+
             return solution;
         }
+        
 
         static bool orderVoldaan(Solution trucks, OrderDescription order)
         {

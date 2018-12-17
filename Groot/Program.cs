@@ -17,12 +17,19 @@ namespace Groot
 
             if (args.Length != 0)
             {
-                search.kmax = int.Parse(args[0]);
-                search.temp = double.Parse(args[1]);
-                search.tempDecrease = int.Parse(args[2]);
-                search.aantalBedrijvenStart = int.Parse(args[3]);
-                if(args.Length == 5)
-                    search.startOplossing = @args[4];
+                try
+                {
+                    search.kmax = int.Parse(args[0]);
+                    search.temp = double.Parse(args[1]);
+                    search.tempDecrease = int.Parse(args[2]);
+                    search.aantalBedrijvenStart = int.Parse(args[3]);
+                    if (args.Length == 5)
+                        search.startOplossing = @args[4];
+                }
+                catch
+                {
+
+                }
             }
 
             trucks = search.FindSolution(trucks);
@@ -30,7 +37,7 @@ namespace Groot
             printSolution(trucks);
 
 #if DEBUG
-            //Console.ReadLine();
+            Console.ReadLine();
 #endif
         }
 
@@ -200,7 +207,7 @@ namespace Groot
         void doStrafPuntenVoorRijTijd(double previousRijTijd, double newRijTijd)
         {
             double maxRijTijd = 3600 * 11.5;
-            double minRijTijd = 3600 * 2;
+            double minRijTijd = 3600 * 10;
             if (previousRijTijd <= maxRijTijd && newRijTijd > maxRijTijd)
                 Strafpunten += overloadstraf * (newRijTijd - maxRijTijd) + overloadstraf;
             else if (previousRijTijd > maxRijTijd && newRijTijd <= maxRijTijd)
@@ -221,9 +228,9 @@ namespace Groot
             int max = 100000;
 
             if (voor < max && na > max)
-                Strafpunten += 10000 * (na - max) + 100000;
+                Strafpunten += 10000 * (na - max) + 10000000;
             else if (voor > max && na < max)
-                Strafpunten -= 10000 * (voor - max) + 100000;
+                Strafpunten -= 10000 * (voor - max) + 10000000;
             else if (voor > max && na > max)
                 Strafpunten += 10000 * (na - voor);
         }
@@ -278,9 +285,15 @@ namespace Groot
             Rijtijd -= LocalSearch.afstandenMatrix[a, c].Rijtijd;
 
             if (bedrijf == 0)
+            {
+                RijTijden[dag] += 30 * 60;
                 Rijtijd += 30 * 60;
+            }
             else
+            {
                 Rijtijd += LocalSearch.ordersDict[bedrijf].LedigingDuurMinuten * 60;
+                RijTijden[dag] += LocalSearch.ordersDict[bedrijf].LedigingDuurMinuten * 60;
+            }
 
             ChangeRijTijdAdd(dag, a, b, c);
 
@@ -343,9 +356,15 @@ namespace Groot
             Rijtijd += LocalSearch.afstandenMatrix[a, c].Rijtijd;
 
             if (Dagen[dag][index] == 0)
+            {
                 Rijtijd -= 30 * 60;
+                RijTijden[dag] -= 30 * 60;
+            }
             else
+            {
                 Rijtijd -= LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 60;
+                RijTijden[dag] -= LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 60;
+            }
 
             ChangeRijTijdRemove(dag, a, b, c);
 
@@ -548,7 +567,7 @@ namespace Groot
             Item1.Parent = this;
             Item2 = truck2.Copy();
             Item2.Parent = this;
-            Rijtijd = 18000;
+            Rijtijd = 0;
         }
 
         public Solution(Truck truck1, Truck truck2, Dictionary<int, ValidArray> validCheck)
