@@ -21,6 +21,8 @@ namespace Groot
                 search.temp = double.Parse(args[1]);
                 search.tempDecrease = int.Parse(args[2]);
                 search.aantalBedrijvenStart = int.Parse(args[3]);
+                if(args.Length == 5)
+                    search.startOplossing = @args[4];
             }
 
             trucks = search.FindSolution(trucks);

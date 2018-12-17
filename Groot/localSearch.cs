@@ -13,14 +13,16 @@ namespace Groot
         public double temp = 1500;
         public int tempDecrease = 10000;
         public int aantalBedrijvenStart = 1000;
-        Random rng = new Random();
-        Solution bestSolution;
+        public string startOplossing = null;
+
         public static AfstandRijtijd[,] afstandenMatrix = null;
         public static Dictionary<int, OrderDescription> ordersDict = null;
         public static OrderDescription[] orders = null;
-        private double MaxPenalty;
+
+        Random rng = new Random();
+        Solution bestSolution;
         private bool emptyStart = false;
-        int ordersToAddAtStart = 200;
+        private double MaxPenalty;
 
         public LocalSearch()
         {
@@ -64,17 +66,19 @@ namespace Groot
 
             orders = ordersDict.Values.ToArray();
 
-            if (!emptyStart)
-            /*for (int i = 0; i < ordersToAddAtStart; i++)
+            if (startOplossing != null)
+                startOplossingInladen(startOplossing, trucks);
+            else if (!emptyStart)
+            /*for (int i = 0; i < aantalBedrijvenStart; i++)
             {
                 int index = rng.Next(0, orders.Length);
-                currentSolution.Item1.AddBedrijf(orders[index].Order, i % (ordersToAddAtStart / 5), i / (ordersToAddAtStart / 5));
+                currentSolution.Item1.AddBedrijf(orders[index].Order, i % (aantalBedrijvenStart / 5), i / (aantalBedrijvenStart / 5));
 
                 index = rng.Next(0, orders.Length);
-                currentSolution.Item2.AddBedrijf(orders[index].Order, i % (ordersToAddAtStart / 5), i / (ordersToAddAtStart / 5));
+                currentSolution.Item2.AddBedrijf(orders[index].Order, i % (aantalBedrijvenStart / 5), i / (aantalBedrijvenStart / 5));
             }*/
             {
-                for(int i = 0; i < 5; i++)
+                for (int i = 0; i < 5; i++)
                 {
                     int index = rng.Next(0, orders.Length);
                     currentSolution.Item1.AddBedrijf( orders[index].Order, 0, i );
@@ -403,6 +407,63 @@ namespace Groot
 
                 ordersDict[a] = new OrderDescription(a, b, c, d, e, f, g, h, ib);
             }
+        }
+
+        public void startOplossingInladen(string path, Solution s)
+        {
+            string[] visits = File.ReadAllLines(path);
+            List<int>[] t1 = s.Item1.Dagen;
+            List<int>[] t2 = s.Item2.Dagen;
+
+            List<int[]> orders = new List<int[]>();
+
+            for (int i = 0; i < visits.Length; i++)
+            {
+                int[] order = new int[4];
+                string[] visit = visits[i].Split(';');
+
+                order[0] = int.Parse(visit[0]);
+                order[1] = int.Parse(visit[1]);
+                order[2] = int.Parse(visit[2]);
+                order[3] = int.Parse(visit[3]);
+
+                orders.Add(order);
+            }
+
+            Comparison<int[]> comp = (a, b) => { return compareOrder(a, b); } ;
+            orders.Sort(comp);
+
+            for (int i = 0; i < orders.Count; i++)
+            {
+                switch(orders[i][0])
+                {
+                    case 1:
+                        t1[orders[i][1] - 1].Add(orders[i][3]);
+                        break;
+                    case 2:
+                        t2[orders[i][1] - 1].Add(orders[i][3]);
+                        break;
+                }
+            }
+
+            for(int i = 0; i < 5; i++)
+            {
+                if (t1[i].Count != 1)
+                    t1[i].RemoveAt(0);
+                if (t2[i].Count != 1)
+                    t2[i].RemoveAt(0);
+            }
+
+        }
+
+        int compareOrder(int[] a, int[] b)
+        {
+            if (a[0] != b[0])
+                return a[0] - b[0];
+            else if (a[1] != b[1])
+                return a[1] - b[1];
+            else
+                return a[2] - b[2];    
         }
     }
 }
