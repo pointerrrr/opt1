@@ -13,7 +13,8 @@ namespace Groot
         public double temp = 1500;
         public int tempDecrease = 10000;
         public int aantalBedrijvenStart = 1000;
-        public string startOplossing = null;
+        //public string startOplossing = null;
+        public string startOplossing = @"out.txt";
 
         public static AfstandRijtijd[,] afstandenMatrix = null;
         public static Dictionary<int, OrderDescription> ordersDict = null;
@@ -67,7 +68,7 @@ namespace Groot
             orders = ordersDict.Values.ToArray();
 
             if (startOplossing != null)
-                startOplossingInladen(startOplossing, trucks);
+                startOplossingInladen(startOplossing, currentSolution);
             else if (!emptyStart)
             /*for (int i = 0; i < aantalBedrijvenStart; i++)
             {
@@ -412,8 +413,8 @@ namespace Groot
         public void startOplossingInladen(string path, Solution s)
         {
             string[] visits = File.ReadAllLines(path);
-            List<int>[] t1 = s.Item1.Dagen;
-            List<int>[] t2 = s.Item2.Dagen;
+            Truck t1 = s.Item1;
+            Truck t2 = s.Item2;
 
             List<int[]> orders = new List<int[]>();
 
@@ -435,25 +436,24 @@ namespace Groot
 
             for (int i = 0; i < orders.Count; i++)
             {
-                switch(orders[i][0])
+                switch (orders[i][0])
                 {
                     case 1:
-                        t1[orders[i][1] - 1].Add(orders[i][3]);
+                        t1.AddBedrijf(orders[i][3], orders[i][2] - 1, orders[i][1] - 1);
                         break;
                     case 2:
-                        t2[orders[i][1] - 1].Add(orders[i][3]);
+                        t2.AddBedrijf(orders[i][3], orders[i][2] - 1, orders[i][1] - 1);
                         break;
                 }
             }
 
             for(int i = 0; i < 5; i++)
             {
-                if (t1[i].Count != 1)
-                    t1[i].RemoveAt(0);
-                if (t2[i].Count != 1)
-                    t2[i].RemoveAt(0);
+                if (t1.Dagen[i].Count != 1)
+                    t1.RemoveBedrijf(t1.Dagen[i].Count - 2, i);
+                if (t2.Dagen[i].Count != 1)
+                    t2.RemoveBedrijf(t2.Dagen[i].Count - 2, i);
             }
-
         }
 
         int compareOrder(int[] a, int[] b)
