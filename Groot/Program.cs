@@ -84,9 +84,12 @@ namespace Groot
     {
         public int Id;
         public List<int>[] Dagen;
-        public int[] RijTijden;
+        public double[] RijTijden;
         public Solution Parent;
-        public double Value {
+        double overloadstraf = 150000;
+
+        public double Value
+        {
             get
             {
                 return Parent.Value;
@@ -123,7 +126,7 @@ namespace Groot
         {
             Id = id;
             Dagen = new List<int>[5];
-            RijTijden = new int[5];
+            RijTijden = new double[5];
 
             for(int i = 0; i < 5; i++)
             {
@@ -150,12 +153,15 @@ namespace Groot
             if (Parent != null)
                 result.Parent = Parent;
 
+            for (int i = 0; i < 5; i++)
+                result.RijTijden[i] = RijTijden[i];
+
             return result;
         }
 
         public void ChangeRijTijdAdd(int dag, int a, int b, int c)
         {
-            int previousRijTijd = RijTijden[dag];
+            double previousRijTijd = RijTijden[dag];
 
             RijTijden[dag] -= LocalSearch.afstandenMatrix[a, c].Rijtijd;
             RijTijden[dag] += LocalSearch.afstandenMatrix[a, b].Rijtijd;
@@ -165,17 +171,20 @@ namespace Groot
 
             double maxRijTijd = 3600 * 11.5;
 
-            if (previousRijTijd < maxRijTijd && newRijTijd > maxRijTijd)
-                Strafpunten += 15000 + ((newRijTijd - maxRijTijd) / (30*60)) * 15000;
-            else if (previousRijTijd > maxRijTijd && newRijTijd < maxRijTijd)
-                Strafpunten -= 15000 + ((previousRijTijd - maxRijTijd) / (30 * 60)) * 15000;
+            if (previousRijTijd <= maxRijTijd && newRijTijd > maxRijTijd)
+                // Strafpunten += overloadstraf + ((newRijTijd - maxRijTijd) / (30 * 60)) * overloadstraf;
+                ;// Strafpunten += overloadstraf * (newRijTijd - maxRijTijd);
+            else if (previousRijTijd > maxRijTijd && newRijTijd <= maxRijTijd)
+                // Strafpunten -= overloadstraf + ((previousRijTijd - maxRijTijd) / (30 * 60)) * overloadstraf;
+                ;// Strafpunten -= overloadstraf * (previousRijTijd - maxRijTijd);
             else if (previousRijTijd > maxRijTijd && newRijTijd > maxRijTijd)
-                Strafpunten += (((newRijTijd - previousRijTijd) - maxRijTijd) / (30 * 60)) * 15000; 
+                // Strafpunten += (((newRijTijd - previousRijTijd) - maxRijTijd) / (30 * 60)) * overloadstraf;
+                ;// Strafpunten += overloadstraf * ((newRijTijd - previousRijTijd) - maxRijTijd);
         }
 
         public void ChangeRijTijdRemove(int dag, int a, int b, int c)
         {
-            int previousRijTijd = RijTijden[dag];
+            double previousRijTijd = RijTijden[dag];
 
             RijTijden[dag] += LocalSearch.afstandenMatrix[a, c].Rijtijd;
             RijTijden[dag] -= LocalSearch.afstandenMatrix[a, b].Rijtijd;
@@ -185,12 +194,19 @@ namespace Groot
 
             double maxRijTijd = 3600 * 11.5;
 
-            if (previousRijTijd < maxRijTijd && newRijTijd > maxRijTijd)
-                Strafpunten += 15000 + ((newRijTijd - maxRijTijd) / (30 * 60)) * 15000;
-            else if (previousRijTijd > maxRijTijd && newRijTijd < maxRijTijd)
-                Strafpunten -= 15000 + ((previousRijTijd - maxRijTijd) / (30 * 60)) * 15000;
+            if (previousRijTijd == newRijTijd)
+                return;
+
+            if (previousRijTijd <= maxRijTijd && newRijTijd > maxRijTijd)
+                // Strafpunten += overloadstraf + ((newRijTijd - maxRijTijd) / (30 * 60)) * overloadstraf;
+                ;// Strafpunten += overloadstraf * (newRijTijd - maxRijTijd);
+            else if (previousRijTijd > maxRijTijd && newRijTijd <= maxRijTijd)
+                // Strafpunten -= overloadstraf + ((previousRijTijd - maxRijTijd) / (30 * 60)) * overloadstraf;
+                ;// Strafpunten -= overloadstraf * (previousRijTijd - maxRijTijd);
             else if (previousRijTijd > maxRijTijd && newRijTijd > maxRijTijd)
-                Strafpunten += (((newRijTijd - previousRijTijd) - maxRijTijd) / (30 * 60)) * 15000;
+                // Strafpunten += (((newRijTijd - previousRijTijd) - maxRijTijd) / (30 * 60)) * overloadstraf;
+                ;// Strafpunten += overloadstraf * ((newRijTijd - previousRijTijd) - maxRijTijd);
+                
         }
 
         public void ChangeCapaciteit(int voor, int na)
@@ -338,9 +354,9 @@ namespace Groot
                 bool validNa = Parent.ValidCheck[Dagen[dag][index]].Valid;
 
                 if (validVoor && !validNa)
-                    Strafpunten += LocalSearch.ordersDict[Dagen[dag][index]].Frequentie * LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 3d * 60d;
+                    Strafpunten += LocalSearch.ordersDict[Dagen[dag][index]].Frequentie * LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 3d * 60d + 15000;
                 else if (validNa && !validVoor)
-                    Strafpunten -= LocalSearch.ordersDict[Dagen[dag][index]].Frequentie * LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 3d * 60d;
+                    Strafpunten -= LocalSearch.ordersDict[Dagen[dag][index]].Frequentie * LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 3d * 60d + 15000;
             }
 
             // Remove from list
@@ -530,16 +546,16 @@ namespace Groot
 
         public Solution(Truck truck1, Truck truck2, Dictionary<int, ValidArray> validCheck)
         {
-            ValidCheck = new Dictionary<int, ValidArray>(validCheck);
             Item1 = truck1.Copy();
-            Item1.Parent = this;
             Item2 = truck2.Copy();
-            Item2.Parent = this;
         }
 
         public Solution Copy()
         {
             Solution result = new Solution(Item1,Item2, ValidCheck);
+
+            result.Item1.Parent = result;
+            result.Item2.Parent = result;
 
             result.ValidCheck = new Dictionary<int, ValidArray>();
             KeyValuePair<int, ValidArray>[] copy = ValidCheck.ToArray();
@@ -599,6 +615,16 @@ namespace Groot
         {
             ValidArray res = new ValidArray(Dag1, Dag2, Dag3, Dag4, Dag5, Frequentie);
             return res;
+        }
+
+        public static bool operator !=(ValidArray a, ValidArray b)
+        {
+            return !(a==b);
+        }
+
+        public static bool operator ==(ValidArray a, ValidArray b)
+        {
+            return a[0] == b[0] && a[1] == b[1] && a[2] == b[2] && a[3] == b[3] && a[4] == b[4] && a.Frequentie == b.Frequentie;
         }
 
         public int this[int key]

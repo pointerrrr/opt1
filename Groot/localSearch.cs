@@ -9,7 +9,7 @@ namespace Groot
 {
     class LocalSearch
     {
-        int kmax = 1000000;
+        int kmax = 200000;
         double temp = 1500;
         Random rng = new Random();
         Solution bestSolution;
@@ -17,7 +17,7 @@ namespace Groot
         public static Dictionary<int, OrderDescription> ordersDict = null;
         public static OrderDescription[] orders = null;
         private double MaxPenalty;
-        private bool emptyStart = false;
+        private bool emptyStart = true;
 
         public LocalSearch()
         {
@@ -28,13 +28,13 @@ namespace Groot
 
         public Solution FindSolution(Solution trucks)
         {
-            Solution currentSolution = new Solution(trucks.Item1, trucks.Item2);
+            Solution currentSolution = trucks.Copy();
             foreach(KeyValuePair<int,OrderDescription> kvp in ordersDict)
             {
                 currentSolution.ValidCheck[kvp.Key] = new ValidArray(f: kvp.Value.Frequentie);
             }
 
-            currentSolution.Strafpunten = solutionValue(currentSolution);
+            currentSolution.Strafpunten = MaxPenalty;
 
             orders = ordersDict.Values.ToArray();
 
@@ -58,7 +58,7 @@ namespace Groot
 
                 Solution randomNeighbor = newNeighbor(currentSolution);
 
-                if (randomNeighbor.Value < currentSolution.Value || acceptanceChance(currentSolution, randomNeighbor, temp) >= rng.NextDouble())
+                if (randomNeighbor.Value <= currentSolution.Value || acceptanceChance(currentSolution, randomNeighbor, temp) >= rng.NextDouble())
                 {
                     currentSolution = randomNeighbor.Copy();
                     if (currentSolution.Value < bestSolution.Value)
@@ -224,7 +224,7 @@ namespace Groot
             foreach(KeyValuePair<int, OrderDescription> kvp in ordersDict)
             {
                 OrderDescription order = kvp.Value;
-                if(!orderVoldaan(trucks, order))
+                if (!orderVoldaan(trucks, order))
                     solution += order.LedigingDuurMinuten * order.Frequentie * 3d * 60d;
             }
             solution += addTijden(trucks.Item1);
