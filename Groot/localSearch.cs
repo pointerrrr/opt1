@@ -9,7 +9,7 @@ namespace Groot
 {
     class LocalSearch
     {
-        int kmax = 200000;
+        int kmax = 1000000;
         double temp = 1500;
         Random rng = new Random();
         Solution bestSolution;
@@ -18,6 +18,7 @@ namespace Groot
         public static OrderDescription[] orders = null;
         private double MaxPenalty;
         private bool emptyStart = true;
+        int ordersToAddAtStart = 200;
 
         public LocalSearch()
         {
@@ -39,13 +40,13 @@ namespace Groot
             orders = ordersDict.Values.ToArray();
 
             if (!emptyStart)
-                for (int i = 0; i < 200; i++)
+                for (int i = 0; i < ordersToAddAtStart; i++)
                 {
                     int index = rng.Next(0, orders.Length);
-                    currentSolution.Item1.AddBedrijf(orders[index].Order, i % 40, i / 40);
+                    currentSolution.Item1.AddBedrijf(orders[index].Order, i % (ordersToAddAtStart / 5), i / (ordersToAddAtStart / 5));
 
                     index = rng.Next(0, orders.Length);
-                    currentSolution.Item2.AddBedrijf(orders[index].Order, i % 40, i / 40);
+                    currentSolution.Item2.AddBedrijf(orders[index].Order, i % (ordersToAddAtStart / 5), i / (ordersToAddAtStart / 5));
                 }
             
             bestSolution = currentSolution.Copy();
@@ -76,7 +77,6 @@ namespace Groot
             return res;
         }
 
-        // TODO !!!
         Solution newNeighbor(Solution trucks)
         {
             Solution result = trucks.Copy();
@@ -275,7 +275,6 @@ namespace Groot
             return solution;
         }
 
-        // TODO
         static bool orderVoldaan(Solution trucks, OrderDescription order)
         {
             bool result = true;

@@ -172,14 +172,11 @@ namespace Groot
             double maxRijTijd = 3600 * 11.5;
 
             if (previousRijTijd <= maxRijTijd && newRijTijd > maxRijTijd)
-                // Strafpunten += overloadstraf + ((newRijTijd - maxRijTijd) / (30 * 60)) * overloadstraf;
-                ;// Strafpunten += overloadstraf * (newRijTijd - maxRijTijd);
+                Strafpunten += overloadstraf * (newRijTijd - maxRijTijd) + overloadstraf;
             else if (previousRijTijd > maxRijTijd && newRijTijd <= maxRijTijd)
-                // Strafpunten -= overloadstraf + ((previousRijTijd - maxRijTijd) / (30 * 60)) * overloadstraf;
-                ;// Strafpunten -= overloadstraf * (previousRijTijd - maxRijTijd);
+                Strafpunten -= overloadstraf * (previousRijTijd - maxRijTijd) + overloadstraf;
             else if (previousRijTijd > maxRijTijd && newRijTijd > maxRijTijd)
-                // Strafpunten += (((newRijTijd - previousRijTijd) - maxRijTijd) / (30 * 60)) * overloadstraf;
-                ;// Strafpunten += overloadstraf * ((newRijTijd - previousRijTijd) - maxRijTijd);
+                Strafpunten += overloadstraf * (newRijTijd - previousRijTijd);
         }
 
         public void ChangeRijTijdRemove(int dag, int a, int b, int c)
@@ -198,15 +195,11 @@ namespace Groot
                 return;
 
             if (previousRijTijd <= maxRijTijd && newRijTijd > maxRijTijd)
-                // Strafpunten += overloadstraf + ((newRijTijd - maxRijTijd) / (30 * 60)) * overloadstraf;
-                ;// Strafpunten += overloadstraf * (newRijTijd - maxRijTijd);
+                Strafpunten += overloadstraf * (newRijTijd - maxRijTijd) + overloadstraf;
             else if (previousRijTijd > maxRijTijd && newRijTijd <= maxRijTijd)
-                // Strafpunten -= overloadstraf + ((previousRijTijd - maxRijTijd) / (30 * 60)) * overloadstraf;
-                ;// Strafpunten -= overloadstraf * (previousRijTijd - maxRijTijd);
+                Strafpunten -= overloadstraf * (previousRijTijd - maxRijTijd) + overloadstraf;
             else if (previousRijTijd > maxRijTijd && newRijTijd > maxRijTijd)
-                // Strafpunten += (((newRijTijd - previousRijTijd) - maxRijTijd) / (30 * 60)) * overloadstraf;
-                ;// Strafpunten += overloadstraf * ((newRijTijd - previousRijTijd) - maxRijTijd);
-                
+                Strafpunten += overloadstraf * (newRijTijd - previousRijTijd);
         }
 
         public void ChangeCapaciteit(int voor, int na)
@@ -218,7 +211,7 @@ namespace Groot
             else if (voor > max && na < max)
                 Strafpunten -= 250 * (voor - max);
             else if (voor > max && na > max)
-                Strafpunten += 250 * ((na - voor) - max);
+                Strafpunten += 250 * (na - voor);
         }
 
         public int CheckCapacity(int dag, int index)
@@ -354,9 +347,9 @@ namespace Groot
                 bool validNa = Parent.ValidCheck[Dagen[dag][index]].Valid;
 
                 if (validVoor && !validNa)
-                    Strafpunten += LocalSearch.ordersDict[Dagen[dag][index]].Frequentie * LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 3d * 60d + 15000;
+                    Strafpunten += LocalSearch.ordersDict[Dagen[dag][index]].Frequentie * LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 3d * 60d;
                 else if (validNa && !validVoor)
-                    Strafpunten -= LocalSearch.ordersDict[Dagen[dag][index]].Frequentie * LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 3d * 60d + 15000;
+                    Strafpunten -= LocalSearch.ordersDict[Dagen[dag][index]].Frequentie * LocalSearch.ordersDict[Dagen[dag][index]].LedigingDuurMinuten * 3d * 60d;
             }
 
             // Remove from list
