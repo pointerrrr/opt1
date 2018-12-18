@@ -32,7 +32,10 @@ namespace Groot
             }
             res.ValidCheck = new Dictionary<int, ValidArray>();
             for (int i = 0; i < Orders.Length; i++)
+            {
                 res.ValidCheck[Orders[i].Key] = new ValidArray(f: Orders[i].Value.Frequentie);
+                res.Strafpunten += Orders[i].Value.Frequentie * Orders[i].Value.LedigingDuurMinuten * 3;
+            }
             return res;
         }
 
@@ -51,10 +54,10 @@ namespace Groot
 
                 Solution randomNeighbor = currentSolution.Copy().RandomMutation();
 
-                if (randomNeighbor.Value >= currentSolution.Value || acceptanceChance(currentSolution, randomNeighbor, T) >= RNG.NextDouble())
+                if (randomNeighbor.Strafpunten <= currentSolution.Strafpunten || acceptanceChance(currentSolution, randomNeighbor, T) >= RNG.NextDouble())
                 {
                     currentSolution = randomNeighbor.Copy();
-                    if (currentSolution.Value > bestSolution.Value)
+                    if (currentSolution.Strafpunten <= bestSolution.Strafpunten)
                     {
                         bestSolution = randomNeighbor.Copy();
                     }
@@ -65,7 +68,7 @@ namespace Groot
 
         private double acceptanceChance(Solution currentSolution, Solution randomNeighbor, double T)
         {
-            double res = Math.Exp((currentSolution.Value - randomNeighbor.Value) / T);
+            double res = Math.Exp((-Math.Abs(currentSolution.Strafpunten - randomNeighbor.Strafpunten)) / T);
             return res;
         }
     }

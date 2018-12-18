@@ -12,7 +12,7 @@ namespace Groot
     {
         public static void Main(string[] args)
         {
-            int maxIterations= 1000, Q = 100;
+            int maxIterations = 1000, Q = 100;
             double T = 100;
             try
             {
@@ -24,8 +24,6 @@ namespace Groot
             {
 
             }
-
-            Init();
 
             LocalSearch search = new LocalSearch(maxIterations, T, Q);
             

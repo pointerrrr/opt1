@@ -7,13 +7,13 @@ namespace Groot
 {
     public static class Data
     {
-        public static Dictionary<int, OrderDescription> OrdersDict = new Dictionary<int, OrderDescription>();
-        public static KeyValuePair<int, OrderDescription>[] Orders;
-        public static AfstandRijtijd[,] AfstandenMatrix;
+        public readonly static Dictionary<int, OrderDescription> OrdersDict = new Dictionary<int, OrderDescription>();
+        public readonly static KeyValuePair<int, OrderDescription>[] Orders;
+        public readonly static AfstandRijtijd[,] AfstandenMatrix;
 
         public static Random RNG = new Random();
 
-        public static void Init()
+        static Data()
         {
             AfstandenMatrix = afstandRijTijdInladen();
             OrdersDict = ordersInladen();
@@ -62,7 +62,6 @@ namespace Groot
                 int g = int.Parse(info[6]);
                 int h = int.Parse(info[7]);
                 int ib = int.Parse(info[8]);
-
                 res[a] = new OrderDescription(a, b, c, d, e, f, g, h, ib);
             }
             return res;
