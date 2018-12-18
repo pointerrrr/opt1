@@ -46,10 +46,10 @@ namespace Groot
             switch (choice)
             {
                 case 0:
-                    res.addRandomOrder(truck);
+                    res.addRandomOrder(truck, res);
                     break;
                 case 1:
-                    res.removeRandomOrder(truck);
+                    res.removeRandomOrder(truck,res);
                     break;
                 case 2:
                     res.swapRandomOrder(truck);
@@ -67,29 +67,33 @@ namespace Groot
             return res;
         }
 
-        public void addRandomOrder(Truck truck)
+        int dagcount = 0;
+
+        public void addRandomOrder(Truck truck, Solution res)
         {
             int dag = RNG.Next(5);
             double oudRijtijd = truck.Rijtijden[dag];
 
-            int orderId = 32245;// Orders[RNG.Next(Orders.Length)].Key;
+            int orderId = Orders[RNG.Next(Orders.Length)].Key;
 
             int index = RNG.Next(truck.Dagen[dag].Count - 1);
 
             truck.AddOrder(orderId, index, dag);
 
-            bool validVoor = ValidCheck[orderId].Valid;
-            ValidCheck[orderId][dag]++;
-            bool validNa = ValidCheck[orderId].Valid;
+            bool validVoor = res.ValidCheck[orderId].Valid;
+            res.ValidCheck[orderId][dag]++;
+            bool validNa = res.ValidCheck[orderId].Valid;
+            if (validNa)
+                ;
             if (validVoor && !validNa)
-                Strafpunten += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
+                res.Strafpunten += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
             else if (validNa && !validVoor)
-                Strafpunten -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
+                res.Strafpunten -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
 
-            Rijtijd += truck.Rijtijden[dag] - oudRijtijd;
+            res.Rijtijd += truck.Rijtijden[dag] - oudRijtijd;
         }
 
-        public void removeRandomOrder(Truck truck)
+        public void removeRandomOrder(Truck truck, Solution res)
         {
             int dag = RNG.Next(5);
 
@@ -104,17 +108,17 @@ namespace Groot
             int orderId = truck.Dagen[dag][index];
             if (orderId != 0)
             {
-                bool validVoor = ValidCheck[orderId].Valid;
-                ValidCheck[orderId][dag]--;
-                bool validNa = ValidCheck[orderId].Valid;
+                bool validVoor = res.ValidCheck[orderId].Valid;
+                res.ValidCheck[orderId][dag]--;
+                bool validNa = res.ValidCheck[orderId].Valid;
                 if (validVoor)
-                    Strafpunten += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3;
+                    res.Strafpunten += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
                 else if (validNa)
-                    Strafpunten -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3;
+                    res.Strafpunten -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
             }
             truck.RemoveOrder(index, dag);
 
-            Rijtijd += truck.Rijtijden[dag] - oudRijtijd;
+            res.Rijtijd += truck.Rijtijden[dag] - oudRijtijd;
         }
 
         public void swapRandomOrder(Truck truck)

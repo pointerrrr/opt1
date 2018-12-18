@@ -12,7 +12,7 @@ namespace Groot
     {
         public static void Main(string[] args)
         {
-            int maxIterations = 1000, Q = 100;
+            int maxIterations = 100000, Q = 100;
             double T = 100;
             try
             {
@@ -25,13 +25,18 @@ namespace Groot
 
             }
 
-            LocalSearch search = new LocalSearch(maxIterations, T, Q);
-            
-            Solution solution = search.FindSolution();
+            for (int i = 0; i < 1000; i++)
+            {
+                RNG = new Random(2);
+                LocalSearch search = new LocalSearch(maxIterations, T, Q);
 
-            printSolution(solution);
+                Solution solution = search.FindSolution();
 
-            Console.ReadLine();
+                printSolution(solution);
+
+
+                Console.ReadLine();
+            }
         }
         
 

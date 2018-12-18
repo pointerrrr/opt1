@@ -54,10 +54,10 @@ namespace Groot
 
                 Solution randomNeighbor = currentSolution.Copy().RandomMutation();
 
-                if (randomNeighbor.Strafpunten <= currentSolution.Strafpunten || acceptanceChance(currentSolution, randomNeighbor, T) >= RNG.NextDouble())
+                if (randomNeighbor.Value <= currentSolution.Value || acceptanceChance(currentSolution, randomNeighbor, T) >= RNG.NextDouble())
                 {
                     currentSolution = randomNeighbor.Copy();
-                    if (currentSolution.Strafpunten <= bestSolution.Strafpunten)
+                    if (currentSolution.Value < bestSolution.Value)
                     {
                         bestSolution = randomNeighbor.Copy();
                     }
