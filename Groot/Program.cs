@@ -12,11 +12,11 @@ namespace Groot
     {
         public static void Main(string[] args)
         {
-            int maxIterations = 100000, Q = 100;
-            double T = 100;
+            int MaxIterations = 10000, Q = 100;
+            double T = 1500;
             try
             {
-                maxIterations = int.Parse(args[0]);
+                MaxIterations = int.Parse(args[0]);
                 T = double.Parse(args[1]);
                 Q = int.Parse(args[2]);
             }
@@ -28,7 +28,7 @@ namespace Groot
             for (int i = 0; i < 1000; i++)
             {
                 RNG = new Random(2);
-                LocalSearch search = new LocalSearch(maxIterations, T, Q);
+                LocalSearch search = new LocalSearch(MaxIterations, T, Q);
 
                 Solution solution = search.FindSolution();
 

@@ -11,12 +11,12 @@ namespace Groot
 {
     class LocalSearch
     {
-        int maxIterations, Q;
+        int MaxIterations, Q;
         double T;
         
-        public LocalSearch(int maxIterations, double T, int Q)
+        public LocalSearch(int MaxIterations, double T, int Q)
         {
-            this.maxIterations = maxIterations; this.T = T; this.Q = Q;
+            this.MaxIterations = MaxIterations; this.T = T; this.Q = Q;
         }
 
         Solution GetStartSolution()
@@ -34,7 +34,7 @@ namespace Groot
             for (int i = 0; i < Orders.Length; i++)
             {
                 res.ValidCheck[Orders[i].Key] = new ValidArray(f: Orders[i].Value.Frequentie);
-                res.Strafpunten += Orders[i].Value.Frequentie * Orders[i].Value.LedigingDuurMinuten * 3;
+                res.Strafpunten += Orders[i].Value.Frequentie * Orders[i].Value.LedigingDuurMinuten * 3d;
             }
             return res;
         }
@@ -45,7 +45,7 @@ namespace Groot
 
             Solution currentSolution = bestSolution.Copy();
 
-            for (int i = 0; i < maxIterations; i++)
+            for (int i = 0; i < MaxIterations; i++)
             {
                 if (i % Q == 0)
                 {
@@ -68,7 +68,7 @@ namespace Groot
 
         private double acceptanceChance(Solution currentSolution, Solution randomNeighbor, double T)
         {
-            double res = Math.Exp((-Math.Abs(currentSolution.Strafpunten - randomNeighbor.Strafpunten)) / T);
+            double res = Math.Exp((-Math.Abs(currentSolution.Value - randomNeighbor.Value)) / T);
             return res;
         }
     }
