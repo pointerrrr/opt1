@@ -38,12 +38,14 @@ namespace Groot
             }
             return res;
         }
-
+        
         public Solution FindSolution()
         {
-            Solution bestSolution = GetStartSolution();
+            Solution currentSolution = GetStartSolution();
 
-            Solution currentSolution = bestSolution.Copy();
+            AddCloud(currentSolution);
+
+            Solution bestSolution = currentSolution.Copy();
 
             for (int i = 0; i < MaxIterations; i++)
             {
@@ -70,6 +72,58 @@ namespace Groot
         {
             double res = Math.Exp((-Math.Abs(currentSolution.Value - randomNeighbor.Value)) / T);
             return res;
+        }
+
+        int[] ClosestBedrijven(int aantal, int matrixID)
+        {
+            int[] res = new int[aantal];
+            List<Tuple<int, AfstandRijtijd>> pres = new List<Tuple<int, AfstandRijtijd>>();
+            for (int i = 0; i < 1099; i++)
+                pres.Add(new Tuple<int, AfstandRijtijd>(i, AfstandenMatrix[matrixID, i]));
+
+            Comparison<Tuple<int, AfstandRijtijd>> comp = (a, b) => { return (int)(a.Item2.Rijtijd - b.Item2.Rijtijd); };
+
+            pres.Sort(comp);
+            pres.RemoveAt(0);
+
+            Tuple<int, AfstandRijtijd>[] array = null;
+            array = pres.Take(aantal).ToArray();
+            for (int i = 0; i < array.Length; i++)
+            {
+                res[i] = Orders.First((o) => { return o.Value.MatrixID == array[i].Item1; }).Value.Order;
+            }
+
+            return res;
+        }
+
+        void AddCloud(Solution currentSolution)
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                int index = RNG.Next(0, Orders.Length);
+                currentSolution[0].AddOrder(Orders[index].Value.Order, 0, i);
+
+                index = RNG.Next(0, Orders.Length);
+                currentSolution[1].AddOrder(Orders[index].Value.Order, 0, i);
+
+
+                int[] closest1 = ClosestBedrijven(1177, OrdersDict[currentSolution[0].Dagen[i][0]].MatrixID);
+                int[] closest2 = ClosestBedrijven(1177, OrdersDict[currentSolution[1].Dagen[i][0]].MatrixID);
+                int j = 0;
+                while (currentSolution[0].Rijtijden[i] < 600 - 30)
+                {
+                    currentSolution.AddSpecificOrder(currentSolution[0], i, j + 1, closest1[j]);
+                    j++;
+                }
+                j = 0;
+                while (currentSolution[1].Rijtijden[i] < 600 - 30)
+                {
+                    currentSolution.AddSpecificOrder(currentSolution[1], i, j + 1, closest2[j]);
+                    j++;
+                }
+                //currentSolution[0].AddOrder(0, aantalBedrijvenStart + 1, i);
+                //currentSolution[1].AddOrder(0, aantalBedrijvenStart + 1, i);
+            }
         }
     }
 }

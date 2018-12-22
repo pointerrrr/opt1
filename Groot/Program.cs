@@ -12,8 +12,8 @@ namespace Groot
     {
         public static void Main(string[] args)
         {
-            int MaxIterations = 10000, Q = 100;
-            double T = 1500;
+            int MaxIterations = 1000000, Q = 100;
+            double T = 100;
             try
             {
                 MaxIterations = int.Parse(args[0]);
@@ -32,7 +32,7 @@ namespace Groot
 
                 Solution solution = search.FindSolution();
 
-                printSolution(solution);
+                PrintSolution(solution);
 
 
                 Console.ReadLine();
@@ -40,7 +40,7 @@ namespace Groot
         }
         
 
-        public static void printSolution(Solution solution)
+        public static void PrintSolution(Solution solution)
         {
             Truck truck1 = solution.Truck1;
             Truck truck2 = solution.Truck2;
