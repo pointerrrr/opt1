@@ -11,8 +11,9 @@ namespace Groot
         public Truck Truck1, Truck2;
         public Dictionary<int, ValidArray> ValidCheck;
         private readonly double MaxRijtijdDag = 60d * 12d;
-        private readonly double RijtijdStraf = 50000d;
-        private readonly double RijtijdStrafMinuut = 100d;
+        private readonly double MinRijtijdDag = 60d * 10d;
+        private readonly double RijtijdStraf = 500000d;
+        private readonly double RijtijdStrafMinuut = 1000d;
         private readonly double MaxCapaciteit = 100000d;
         private readonly double CapaciteitStraf = 10000d;
         private readonly double CapaciteitStrafLiter = 10d;
@@ -38,6 +39,7 @@ namespace Groot
                 res.ValidCheck[kvp.Key] = kvp.Value.Copy();
             res.Rijtijd = Rijtijd;
             res.Strafpunten = Strafpunten;
+            res.StrafIntern = StrafIntern;
             return res;
         }
 
@@ -45,7 +47,7 @@ namespace Groot
         {
             Solution res = Copy();
 
-            int choice = RNG.Next(5);
+            int choice = RNG.Next(7);
             int truckChoice = RNG.Next(2);
             Truck truck = res[truckChoice];
 
@@ -69,6 +71,10 @@ namespace Groot
                 case 5:
                     res.ChangeRandomOrderTruck();
                     break;
+                case 6:
+                    res.TwoAndAHalfOpt(truck);
+                    break;
+
             }
             return res;
         }
@@ -101,9 +107,15 @@ namespace Groot
                 bool validNa = ValidCheck[orderId].Valid;
 
                 if (validVoor)
+                {
                     Strafpunten += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
+                    //StrafIntern += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 100d;
+                }
                 else if (validNa)
+                {
                     Strafpunten -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
+                    //StrafIntern -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 100d;
+                }
             }
             UpdateRijtijdStraf(oudRijtijd, truck.Rijtijden[dag]);
             ChangeCapaciteit(capaciteitVoor, capaciteitNa);
@@ -134,9 +146,15 @@ namespace Groot
                 bool validNa = ValidCheck[orderId].Valid;
 
                 if (validVoor)
+                {
                     Strafpunten += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
+                    //StrafIntern += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 100d;
+                }
                 else if (validNa)
+                {
                     Strafpunten -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
+                    //StrafIntern -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 100d;
+                }
             }
 
             int capaciteitVoor = CheckCapacity(truck, dag, index);
@@ -257,7 +275,34 @@ namespace Groot
             }
         }
 
-        private void UpdateRijtijdStraf(double oud, double nieuw)
+        public void TwoAndAHalfOpt(Truck truck)
+        {
+            
+            int dag = RNG.Next(5);
+
+            if (truck.Dagen[dag].Count < 4)
+                return;
+
+            int plek1 = RNG.Next(0, truck.Dagen[dag].Count - 1);
+            
+            int plek1res = truck.Dagen[dag][plek1];
+
+            RemoveSpecificOrder(truck, dag, plek1);
+
+            int plek2 = RNG.Next(0, truck.Dagen[dag].Count - 1);
+
+            AddSpecificOrder(truck, dag, plek2, plek1res);
+        }
+
+        public void UpdateRijtijdStraf(double oud, double nieuw)
+        {
+            UpdateRijtijdStrafMax(oud, nieuw);
+            UpdateRijtijdStrafMin(oud, nieuw);
+
+            
+        }
+
+        public void UpdateRijtijdStrafMax(double oud, double nieuw)
         {
             if (oud <= MaxRijtijdDag && nieuw > MaxRijtijdDag)
                 StrafIntern += (nieuw - MaxRijtijdDag) * RijtijdStrafMinuut + RijtijdStraf;
@@ -267,13 +312,23 @@ namespace Groot
                 StrafIntern += (nieuw - oud) * RijtijdStrafMinuut;
         }
 
+        public void UpdateRijtijdStrafMin(double oud, double nieuw)
+        {
+            if (oud >= MinRijtijdDag && nieuw < MinRijtijdDag)
+                StrafIntern += (MinRijtijdDag - nieuw) * RijtijdStrafMinuut + RijtijdStraf;
+            else if (oud < MinRijtijdDag && nieuw >= MinRijtijdDag)
+                StrafIntern -= (MinRijtijdDag - oud) * RijtijdStrafMinuut + RijtijdStraf;
+            else if (oud < MinRijtijdDag && nieuw < MinRijtijdDag)
+                StrafIntern += (oud - nieuw) * RijtijdStrafMinuut;
+        }
+
         public void ChangeCapaciteit(int voor, int na)
         {
             double max = MaxCapaciteit;
 
-            if (voor < max && na > max)
+            if (voor <= max && na > max)
                 StrafIntern += CapaciteitStrafLiter * (na - max) + CapaciteitStraf;
-            else if (voor > max && na < max)
+            else if (voor > max && na <= max)
                 StrafIntern -= CapaciteitStrafLiter * (voor - max) + CapaciteitStraf;
             else if (voor > max && na > max)
                 StrafIntern += CapaciteitStrafLiter * (na - voor);
@@ -285,15 +340,23 @@ namespace Groot
             int i = index;
             int j = index + 1;
 
-            while (i >= 0 && truck.Dagen[dag][i] != 0)
+            if (truck.Dagen[dag][index] != 0)
             {
-                result += OrdersDict[truck.Dagen[dag][i]].AantContainers * OrdersDict[truck.Dagen[dag][i]].VolumePerContainer;
-                i--;
+
+                while (i >= 0 && truck.Dagen[dag][i] != 0)
+                {
+                    result += OrdersDict[truck.Dagen[dag][i]].AantContainers * OrdersDict[truck.Dagen[dag][i]].VolumePerContainer;
+                    i--;
+                }
+                while (j < truck.Dagen[dag].Count && truck.Dagen[dag][j] != 0)
+                {
+                    result += OrdersDict[truck.Dagen[dag][j]].AantContainers * OrdersDict[truck.Dagen[dag][j]].VolumePerContainer;
+                    j++;
+                }
             }
-            while (j < truck.Dagen[dag].Count && truck.Dagen[dag][j] != 0)
+            else
             {
-                result += OrdersDict[truck.Dagen[dag][j]].AantContainers * OrdersDict[truck.Dagen[dag][j]].VolumePerContainer;
-                j++;
+
             }
 
             return result;
