@@ -12,8 +12,8 @@ namespace Groot
         public Dictionary<int, ValidArray> ValidCheck;
         private readonly double MaxRijtijdDag = 60d * 12d;
         private readonly double MinRijtijdDag = 60d * 10d;
-        private readonly double RijtijdStraf = 500000d;
-        private readonly double RijtijdStrafMinuut = 1000d;
+        private readonly double RijtijdStraf = 5000000d;
+        private readonly double RijtijdStrafMinuut = 100000d;
         private readonly double MaxCapaciteit = 100000d;
         private readonly double CapaciteitStraf = 10000d;
         private readonly double CapaciteitStrafLiter = 10d;
@@ -43,24 +43,24 @@ namespace Groot
             return res;
         }
 
-        public Solution RandomMutation()
+        public Solution RandomMutation(int max = 7)
         {
             Solution res = Copy();
 
-            int choice = RNG.Next(7);
+            int choice = RNG.Next(max);
             int truckChoice = RNG.Next(2);
             Truck truck = res[truckChoice];
 
             switch (choice)
             {
                 case 0:
-                    res.AddRandomOrder(truck);
+                    res.SwapRandomOrder(truck);
                     break;
                 case 1:
                     res.RemoveRandomOrder(truck);
                     break;
-                case 2:
-                    res.SwapRandomOrder(truck);
+                case 2:                    
+                    res.AddRandomOrder(truck);
                     break;
                 case 3:
                     res.AddRandomDumpen(truck);
@@ -109,12 +109,12 @@ namespace Groot
                 if (validVoor)
                 {
                     Strafpunten += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
-                    //StrafIntern += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 100d;
+                    StrafIntern += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
                 }
                 else if (validNa)
                 {
                     Strafpunten -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
-                    //StrafIntern -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 100d;
+                    StrafIntern -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
                 }
             }
             UpdateRijtijdStraf(oudRijtijd, truck.Rijtijden[dag]);
@@ -148,12 +148,12 @@ namespace Groot
                 if (validVoor)
                 {
                     Strafpunten += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
-                    //StrafIntern += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 100d;
+                    StrafIntern += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
                 }
                 else if (validNa)
                 {
                     Strafpunten -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
-                    //StrafIntern -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 100d;
+                    StrafIntern -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
                 }
             }
 
@@ -314,12 +314,12 @@ namespace Groot
 
         public void UpdateRijtijdStrafMin(double oud, double nieuw)
         {
-            if (oud >= MinRijtijdDag && nieuw < MinRijtijdDag)
+            /*if (oud >= MinRijtijdDag && nieuw < MinRijtijdDag)
                 StrafIntern += (MinRijtijdDag - nieuw) * RijtijdStrafMinuut + RijtijdStraf;
             else if (oud < MinRijtijdDag && nieuw >= MinRijtijdDag)
                 StrafIntern -= (MinRijtijdDag - oud) * RijtijdStrafMinuut + RijtijdStraf;
             else if (oud < MinRijtijdDag && nieuw < MinRijtijdDag)
-                StrafIntern += (oud - nieuw) * RijtijdStrafMinuut;
+                StrafIntern += (oud - nieuw) * RijtijdStrafMinuut;*/
         }
 
         public void ChangeCapaciteit(int[] voorList, int[] naList)

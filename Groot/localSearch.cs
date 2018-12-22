@@ -12,11 +12,12 @@ namespace Groot
     class LocalSearch
     {
         private int MaxIterations, Q;
+        private double startT = 0;
         private double T;
         
         public LocalSearch(int MaxIterations, double T, int Q)
         {
-            this.MaxIterations = MaxIterations; this.T = T; this.Q = Q;
+            this.MaxIterations = MaxIterations; this.T = T; this.Q = Q; startT = T;
         }
 
         Solution GetStartSolution()
@@ -53,7 +54,7 @@ namespace Groot
 
             Solution bestSolution = currentSolution.Copy();
 
-            for (int i = 0; i < MaxIterations || lastDecrementFound < 100000; i++)
+            for (int i = 0; i < MaxIterations || lastDecrementFound < 1; i++)
             {
                 if (i % Q == 0)
                 {
@@ -73,6 +74,29 @@ namespace Groot
                 }
             }
 
+            lastDecrementFound = 0;
+            T = startT;
+
+            for(int i = 0; i < MaxIterations && lastDecrementFound < 100000; i++)
+            {
+                if (i % Q == 0)
+                {
+                    T *= 0.99d;
+                }
+
+                Solution randomNeighbor = currentSolution.Copy().RandomMutation(1);
+
+                lastDecrementFound++;
+                if (randomNeighbor.Value <= currentSolution.Value || acceptanceChance(currentSolution, randomNeighbor, T) >= RNG.NextDouble())
+                {
+                    currentSolution = randomNeighbor.Copy();
+                    if (currentSolution.Value < bestSolution.Value)
+                    {
+                        bestSolution = randomNeighbor.Copy();
+                        lastDecrementFound = 0;
+                    }
+                }
+            }
 
             return bestSolution;
         }
