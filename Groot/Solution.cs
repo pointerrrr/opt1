@@ -94,11 +94,11 @@ namespace Groot
         {
             double oudRijtijd = truck.Rijtijden[dag];
 
-            int capaciteitVoor = CheckCapacity(truck, dag, index);
+            int[] capaciteitVoor = CheckCapacity(truck, dag, index);
 
             truck.AddOrder(orderId, index, dag);
 
-            int capaciteitNa = CheckCapacity(truck, dag, index);
+            int[] capaciteitNa = CheckCapacity(truck, dag, index);
 
             if (orderId != 0)
             {
@@ -157,9 +157,9 @@ namespace Groot
                 }
             }
 
-            int capaciteitVoor = CheckCapacity(truck, dag, index);
+            int[] capaciteitVoor = CheckCapacity(truck, dag, index);
             truck.RemoveOrder(index, dag);
-            int capaciteitNa = CheckCapacity(truck, dag, index);
+            int[] capaciteitNa = CheckCapacity(truck, dag, index);
             UpdateRijtijdStraf(oudRijtijd, truck.Rijtijden[dag]);
             ChangeCapaciteit(capaciteitVoor, capaciteitNa);
             Rijtijd += truck.Rijtijden[dag] - oudRijtijd;
@@ -322,19 +322,30 @@ namespace Groot
                 StrafIntern += (oud - nieuw) * RijtijdStrafMinuut;
         }
 
-        public void ChangeCapaciteit(int voor, int na)
+        public void ChangeCapaciteit(int[] voorList, int[] naList)
         {
-            double max = MaxCapaciteit;
+            if (voorList.Length == 1 && naList.Length == 1)
+            {
+                int voor = voorList[0];
+                int na = naList[0];
+                double max = MaxCapaciteit;
 
-            if (voor <= max && na > max)
-                StrafIntern += CapaciteitStrafLiter * (na - max) + CapaciteitStraf;
-            else if (voor > max && na <= max)
-                StrafIntern -= CapaciteitStrafLiter * (voor - max) + CapaciteitStraf;
-            else if (voor > max && na > max)
-                StrafIntern += CapaciteitStrafLiter * (na - voor);
+                if (voor <= max && na > max)
+                    StrafIntern += CapaciteitStrafLiter * (na - max) + CapaciteitStraf;
+                else if (voor > max && na <= max)
+                    StrafIntern -= CapaciteitStrafLiter * (voor - max) + CapaciteitStraf;
+                else if (voor > max && na > max)
+                    StrafIntern += CapaciteitStrafLiter * (na - voor);
+            }
+            if (voorList.Length > 1 && naList.Length == 1)
+                ;
+            if (voorList.Length == 1 && naList.Length > 1)
+                ;
+            if (voorList.Length > 1 && naList.Length > 1)
+                ;
         }
 
-        public int CheckCapacity(Truck truck ,int dag, int index)
+        public int[] CheckCapacity(Truck truck ,int dag, int index)
         {
             int result = 0;
             int i = index;
@@ -353,13 +364,26 @@ namespace Groot
                     result += OrdersDict[truck.Dagen[dag][j]].AantContainers * OrdersDict[truck.Dagen[dag][j]].VolumePerContainer;
                     j++;
                 }
+                return new int[] { result};
             }
             else
             {
-
+                int result1 = 0, result2 = 0;
+                i = index -1;
+                while (i >= 0 && truck.Dagen[dag][i] != 0)
+                {
+                    result1 += OrdersDict[truck.Dagen[dag][i]].AantContainers * OrdersDict[truck.Dagen[dag][i]].VolumePerContainer;
+                    i--;
+                }
+                while (j < truck.Dagen[dag].Count && truck.Dagen[dag][j] != 0)
+                {
+                    result2 += OrdersDict[truck.Dagen[dag][j]].AantContainers * OrdersDict[truck.Dagen[dag][j]].VolumePerContainer;
+                    j++;
+                }
+                return new int[] { result1, result2 };
             }
 
-            return result;
+            
         }
 
         public Truck this[int key]
