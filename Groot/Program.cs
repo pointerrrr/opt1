@@ -12,7 +12,7 @@ namespace Groot
     {
         public static void Main(string[] args)
         {
-            int MaxIterations = 2000000, Q = 10000;
+            int MaxIterations = 1000, Q = 100;
             double T = 30d;
             try
             {
@@ -25,7 +25,6 @@ namespace Groot
 
             }
 
-            //RNG = new Random(2);
             LocalSearch search = new LocalSearch(MaxIterations, T, Q);
 
             Solution solution = search.FindSolution();
@@ -43,11 +42,27 @@ namespace Groot
             {
                 for (int j = 0; j < truck1.Dagen[i].Count; j++)
                 {
-                    Console.WriteLine("1; " + (i + 1) + "; " + (j + 1) + "; " + truck1.Dagen[i][j]);
+                    int n = 1;
+                    for (int k = 0; k < truck1.Dagen[i][j].Item1.Count; k++)
+                    {
+                        
+                        Console.WriteLine("1; " + (i + 1) + "; " + (n++) + "; " + truck1.Dagen[i][j].Item1[k]);
+                    }
+                        
+                    Console.WriteLine("1; " + (i + 1) + "; " + (n++) + "; " + 0);
+                    
                 }
+                    
                 for (int j = 0; j < truck2.Dagen[i].Count; j++)
                 {
-                    Console.WriteLine("2; " + (i + 1) + "; " + (j + 1) + "; " + truck2.Dagen[i][j]);
+                    int n = 1;
+                    for (int k = 0; k < truck1.Dagen[i][j].Item1.Count; k++)
+                    {
+
+                        Console.WriteLine("1; " + (i + 1) + "; " + (n++) + "; " + truck1.Dagen[i][j].Item1[k]);
+                    }
+
+                    Console.WriteLine("1; " + (i + 1) + "; " + (n++) + "; " + 0);
                 }
             }
         }

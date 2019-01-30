@@ -54,7 +54,7 @@ namespace Groot
             switch (choice)
             {
                 case 0:
-                    res.SwapRandomOrder(truck);
+                    res.ShiftRandomOrderWithinRoute(truck);
                     break;
                 case 1:
                     res.RemoveRandomOrder(truck);
@@ -63,13 +63,13 @@ namespace Groot
                     res.AddRandomOrder(truck);
                     break;
                 case 3:
-                    res.AddRandomDumpen(truck);
+                    res.AddDumpen(truck);
                     break;
                 case 4:
-                    res.ChangeRandomOrderDay(truck);
+                    res.ShiftRandomOrderBetweenDays(truck);
                     break;
                 case 5:
-                    res.ChangeRandomOrderTruck();
+                    res.ShiftRandomOrderBetweenTrucks();
                     break;
                 case 6:
                     res.TwoAndAHalfOpt(truck);
@@ -85,40 +85,31 @@ namespace Groot
             
             int orderId = Orders[RNG.Next(Orders.Length)].Key;
 
-            int index = RNG.Next(truck.Dagen[dag].Count - 1);
+            int route = RNG.Next(truck.Dagen[dag].Count);
 
-            AddSpecificOrder(truck, dag, index, orderId);
+            int index = RNG.Next(truck.Dagen[dag][route].Item1.Count);
+
+
+            AddSpecificOrder(truck, dag, route, index, orderId);
         }
 
-        public void AddSpecificOrder(Truck truck, int dag, int index, int orderId)
+        public void AddSpecificOrder(Truck truck, int dag, int route, int index, int orderId)
         {
             double oudRijtijd = truck.Rijtijden[dag];
 
-            int[] capaciteitVoor = CheckCapacity(truck, dag, index);
+            double capaciteitVoor = truck.Dagen[dag][route].Item2.Value;
 
-            truck.AddOrder(orderId, index, dag);
+            truck.AddOrder(orderId, index, dag, route);
 
-            int[] capaciteitNa = CheckCapacity(truck, dag, index);
+            double capaciteitNa = truck.Dagen[dag][route].Item2.Value;
 
-            if (orderId != 0)
-            {
-                bool validVoor = ValidCheck[orderId].Valid;
-                ValidCheck[orderId][dag]++;
-                bool validNa = ValidCheck[orderId].Valid;
-
-                if (validVoor)
-                {
-                    Strafpunten += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
-                    StrafIntern += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
-                }
-                else if (validNa)
-                {
-                    Strafpunten -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
-                    StrafIntern -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
-                }
-            }
+            bool validVoor = ValidCheck[orderId].Valid;
+            ValidCheck[orderId][dag]++;
+            bool validNa = ValidCheck[orderId].Valid;
+            UpdateValid(orderId, validVoor, validNa);
+            
             UpdateRijtijdStraf(oudRijtijd, truck.Rijtijden[dag]);
-            ChangeCapaciteit(capaciteitVoor, capaciteitNa);
+            UpdateCapaciteit(capaciteitVoor, capaciteitNa);
             Rijtijd += truck.Rijtijden[dag] - oudRijtijd;
         }
 
@@ -129,120 +120,138 @@ namespace Groot
             if (truck.Dagen[dag].Count < 3)
                 return;
 
-            int index = RNG.Next(truck.Dagen[dag].Count - 1);
+            int route = RNG.Next(truck.Dagen[dag].Count);
 
-            RemoveSpecificOrder(truck, dag, index);
+            int index = RNG.Next(truck.Dagen[dag][route].Item1.Count);
+
+            RemoveSpecificOrder(truck, dag, route, index);
         }
 
-        public void RemoveSpecificOrder(Truck truck, int dag, int index)
+        public void RemoveSpecificOrder(Truck truck, int dag, int route, int index)
         {
+            if (truck.Dagen[dag][route].Item1.Count < 1)
+                return;
+
             double oudRijtijd = truck.Rijtijden[dag];
 
-            int orderId = truck.Dagen[dag][index];
-            if (orderId != 0)
-            {
-                bool validVoor = ValidCheck[orderId].Valid;
-                ValidCheck[orderId][dag]--;
-                bool validNa = ValidCheck[orderId].Valid;
+            int orderId = truck.Dagen[dag][route].Item1[index];
 
-                if (validVoor)
-                {
-                    Strafpunten += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
-                    StrafIntern += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
-                }
-                else if (validNa)
-                {
-                    Strafpunten -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
-                    StrafIntern -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
-                }
-            }
+            bool validVoor = ValidCheck[orderId].Valid;
+            ValidCheck[orderId][dag]--;
+            bool validNa = ValidCheck[orderId].Valid;
+            UpdateValid(orderId, validVoor, validNa);
 
-            int[] capaciteitVoor = CheckCapacity(truck, dag, index);
-            truck.RemoveOrder(index, dag);
-            int[] capaciteitNa = CheckCapacity(truck, dag, index);
+            double capaciteitVoor = truck.Dagen[dag][route].Item2.Value;
+            truck.RemoveOrder(index, dag, route);
+            double capaciteitNa = truck.Dagen[dag][route].Item2.Value;
+
             UpdateRijtijdStraf(oudRijtijd, truck.Rijtijden[dag]);
-            ChangeCapaciteit(capaciteitVoor, capaciteitNa);
+            UpdateCapaciteit(capaciteitVoor, capaciteitNa);
             Rijtijd += truck.Rijtijden[dag] - oudRijtijd;
         }
 
-        public void SwapRandomOrder(Truck truck)
+        public void ShiftRandomOrderWithinRoute(Truck truck)
         {
             int dag = RNG.Next(5);
+            int route = RNG.Next(truck.Dagen[dag].Count);
+
             int plek1;
             int plek2;
             int plek1res;
-            int plek2res;
+
+            if (truck.Dagen[dag][route].Item1.Count < 1)
+                return;
 
             double oudRijtijd = truck.Rijtijden[dag];
 
-            if (truck.Dagen[dag].Count < 4)
-                return;
+            plek1 = RNG.Next(truck.Dagen[dag][route].Item1.Count);
+            plek1res = truck.Dagen[dag][route].Item1[plek1];
 
-            plek1 = RNG.Next(0, truck.Dagen[dag].Count - 1);
-            plek1res = truck.Dagen[dag][plek1];
-
-            plek2 = RNG.Next(0, truck.Dagen[dag].Count - 1);
-            plek2res = truck.Dagen[dag][plek2];
+            plek2 = RNG.Next(truck.Dagen[dag][route].Item1.Count);
 
             if (plek1 == plek2)
                 return;
 
-            RemoveSpecificOrder(truck, dag, plek1);
-            AddSpecificOrder(truck, dag, plek1, plek2res);
-
-            RemoveSpecificOrder(truck, dag, plek2);
-            AddSpecificOrder(truck, dag, plek2, plek1res);
+            RemoveSpecificOrder(truck, dag, route, plek1);
+            AddSpecificOrder(truck, dag, route, plek2, plek1res);
         }
 
-        public void AddRandomDumpen(Truck truck)
+        public void ShiftRandomOrderBetweenRoutes(Truck truck)
         {
             int dag = RNG.Next(5);
+            int route1 = RNG.Next(truck.Dagen[dag].Count);
+            int route2 = RNG.Next(truck.Dagen[dag].Count);
 
-            int index = RNG.Next(truck.Dagen[dag].Count - 1);
+            int plek1;
+            int plek2;
+            int plek1res;
+
+            if (truck.Dagen[dag][route1].Item1.Count < 1 || truck.Dagen[dag][route2].Item1.Count < 1)
+                return;
 
             double oudRijtijd = truck.Rijtijden[dag];
 
-            AddSpecificOrder(truck, dag, index, 0);
+            plek1 = RNG.Next(truck.Dagen[dag][route1].Item1.Count);
+            plek1res = truck.Dagen[dag][route1].Item1[plek1];
+
+            plek2 = RNG.Next(truck.Dagen[dag][route2].Item1.Count);
+
+            RemoveSpecificOrder(truck, dag, route1, plek1);
+            AddSpecificOrder(truck, dag, route2, plek2, plek1res);
         }
 
-        public void ChangeRandomOrderDay(Truck truck)
+        public void AddDumpen(Truck truck)
+        {
+            int dag = RNG.Next(5);
+            int route = RNG.Next(truck.Dagen[dag].Count);
+
+            if (truck.Dagen[dag][route].Item1.Count < 3)
+                return;
+
+            int index = RNG.Next(truck.Dagen[dag][route].Item1.Count - 1);
+
+            truck.AddDumpen(dag, route, index);
+        }
+
+        public void RemoveDumpen(Truck truck)
+        {
+            int dag = RNG.Next(5);
+            int route = RNG.Next(truck.Dagen[dag].Count);
+
+            if (truck.Dagen[dag][route].Item1.Count < 3)
+                return;
+
+            truck.RemoveDumpen(dag, route);
+        }
+
+        public void ShiftRandomOrderBetweenDays(Truck truck)
         {
             int plek1;
             int plek2;
             int plek1res;
-            int plek2res;
-            int count = 0;
 
             // Init random values
             int dag1 = RNG.Next(5);
             int dag2 = RNG.Next(5);
+            int route1 = RNG.Next(truck.Dagen[dag1].Count);
+            int route2 = RNG.Next(truck.Dagen[dag2].Count);
 
             if (dag1 == dag2)
                 return;
 
-            plek1 = RNG.Next(0, truck.Dagen[dag1].Count - 1);
-            plek2 = RNG.Next(0, truck.Dagen[dag2].Count - 1);
+            if (truck.Dagen[dag1][route1].Item1.Count < 1 || truck.Dagen[dag2][route2].Item1.Count < 1)
+                return;
 
-            while ((truck.Dagen[dag1][plek1] == 0 || truck.Dagen[dag2][plek2] == 0) && count++ < 10)
-            {
-                plek1 = RNG.Next(0, truck.Dagen[dag1].Count - 1);
-                plek2 = RNG.Next(0, truck.Dagen[dag2].Count - 1);
-            }
+            plek1 = RNG.Next(truck.Dagen[dag1][route1].Item1.Count);
+            plek2 = RNG.Next(truck.Dagen[dag2][route2].Item1.Count);
 
-            // Swap orders if not dump
-            if (count < 10)
-            {
-                plek1res = truck.Dagen[dag1][plek1];
-                plek2res = truck.Dagen[dag2][plek2];
+            plek1res = truck.Dagen[dag1][route1].Item1[plek1];
 
-                RemoveSpecificOrder(truck, dag1, plek1);
-                RemoveSpecificOrder(truck, dag2, plek2);
-                AddSpecificOrder(truck, dag1, plek1, plek2res);
-                AddSpecificOrder(truck, dag2, plek2, plek1res);
-            }
+            RemoveSpecificOrder(truck, dag1, route1, plek1);
+            AddSpecificOrder(truck, dag2, route2, plek2, plek1res);
         }
 
-        public void ChangeRandomOrderTruck()
+        public void ShiftRandomOrderBetweenTrucks()
         {
             int dag1 = RNG.Next(5);
             int dag2 = RNG.Next(5);
@@ -252,54 +261,34 @@ namespace Groot
             Truck Truck1 = this[swapTo];
             Truck Truck2 = this[swapFrom];
 
+            int route1 = RNG.Next(Truck1.Dagen[dag1].Count);
+            int route2 = RNG.Next(Truck2.Dagen[dag2].Count);
+
+            if (Truck1.Dagen[dag1][route1].Item1.Count < 1 || Truck2.Dagen[dag2][route2].Item1.Count < 1)
+                return;
+
             int plek1;
             int plek2;
             int plek1res;
-            int counter = 0;
+            
+            plek1 = RNG.Next(Truck1.Dagen[dag1][route1].Item1.Count);
+            plek2 = RNG.Next(Truck2.Dagen[dag2][route2].Item1.Count);
 
-            plek1 = RNG.Next(0, Truck1.Dagen[dag1].Count - 1);
-            plek2 = RNG.Next(0, Truck2.Dagen[dag2].Count - 1);
+            plek1res = Truck1.Dagen[dag1][route1].Item1[plek1];
 
-            while ((Truck1.Dagen[dag1][plek1] == 0 || Truck2.Dagen[dag2][plek2] == 0) && counter++ < 10)
-            {
-                plek1 = RNG.Next(0, Truck1.Dagen[dag1].Count - 1);
-                plek2 = RNG.Next(0, Truck2.Dagen[dag2].Count - 1);
-            }
-
-            if (counter < 10)
-            {
-                plek1res = Truck1.Dagen[dag1][plek1];
-
-                RemoveSpecificOrder(Truck1, dag1, plek1);
-                AddSpecificOrder(Truck2, dag2, plek2, plek1res);
-            }
+            RemoveSpecificOrder(Truck1, dag1, route1, plek1);
+            AddSpecificOrder(Truck2, dag2, route2, plek2, plek1res);
         }
 
         public void TwoAndAHalfOpt(Truck truck)
-        {
-            
-            int dag = RNG.Next(5);
-
-            if (truck.Dagen[dag].Count < 4)
-                return;
-
-            int plek1 = RNG.Next(0, truck.Dagen[dag].Count - 1);
-            
-            int plek1res = truck.Dagen[dag][plek1];
-
-            RemoveSpecificOrder(truck, dag, plek1);
-
-            int plek2 = RNG.Next(0, truck.Dagen[dag].Count - 1);
-
-            AddSpecificOrder(truck, dag, plek2, plek1res);
+        {            
+            // TODO
         }
 
         public void UpdateRijtijdStraf(double oud, double nieuw)
         {
             UpdateRijtijdStrafMax(oud, nieuw);
             UpdateRijtijdStrafMin(oud, nieuw);
-
-            
         }
 
         public void UpdateRijtijdStrafMax(double oud, double nieuw)
@@ -322,68 +311,28 @@ namespace Groot
                 StrafIntern += (oud - nieuw) * RijtijdStrafMinuut;*/
         }
 
-        public void ChangeCapaciteit(int[] voorList, int[] naList)
+        public void UpdateValid(int orderId, bool validVoor, bool validNa)
         {
-            if (voorList.Length == 1 && naList.Length == 1)
+            if (validVoor)
             {
-                int voor = voorList[0];
-                int na = naList[0];
-                double max = MaxCapaciteit;
-
-                if (voor <= max && na > max)
-                    StrafIntern += CapaciteitStrafLiter * (na - max) + CapaciteitStraf;
-                else if (voor > max && na <= max)
-                    StrafIntern -= CapaciteitStrafLiter * (voor - max) + CapaciteitStraf;
-                else if (voor > max && na > max)
-                    StrafIntern += CapaciteitStrafLiter * (na - voor);
+                Strafpunten += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
+                StrafIntern += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
             }
-            if (voorList.Length > 1 && naList.Length == 1)
-                ;
-            if (voorList.Length == 1 && naList.Length > 1)
-                ;
-            if (voorList.Length > 1 && naList.Length > 1)
-                ;
+            else if (validNa)
+            {
+                Strafpunten -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
+                StrafIntern -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
+            }
         }
 
-        public int[] CheckCapacity(Truck truck ,int dag, int index)
+        public void UpdateCapaciteit(double capaciteitVoor, double capaciteitNa)
         {
-            int result = 0;
-            int i = index;
-            int j = index + 1;
-
-            if (truck.Dagen[dag][index] != 0)
-            {
-
-                while (i >= 0 && truck.Dagen[dag][i] != 0)
-                {
-                    result += OrdersDict[truck.Dagen[dag][i]].AantContainers * OrdersDict[truck.Dagen[dag][i]].VolumePerContainer;
-                    i--;
-                }
-                while (j < truck.Dagen[dag].Count && truck.Dagen[dag][j] != 0)
-                {
-                    result += OrdersDict[truck.Dagen[dag][j]].AantContainers * OrdersDict[truck.Dagen[dag][j]].VolumePerContainer;
-                    j++;
-                }
-                return new int[] { result};
-            }
-            else
-            {
-                int result1 = 0, result2 = 0;
-                i = index -1;
-                while (i >= 0 && truck.Dagen[dag][i] != 0)
-                {
-                    result1 += OrdersDict[truck.Dagen[dag][i]].AantContainers * OrdersDict[truck.Dagen[dag][i]].VolumePerContainer;
-                    i--;
-                }
-                while (j < truck.Dagen[dag].Count && truck.Dagen[dag][j] != 0)
-                {
-                    result2 += OrdersDict[truck.Dagen[dag][j]].AantContainers * OrdersDict[truck.Dagen[dag][j]].VolumePerContainer;
-                    j++;
-                }
-                return new int[] { result1, result2 };
-            }
-
-            
+            if (capaciteitVoor <= MaxCapaciteit && capaciteitNa > MaxCapaciteit)
+                StrafIntern += CapaciteitStrafLiter * (capaciteitNa - MaxCapaciteit) + CapaciteitStraf;
+            else if (capaciteitVoor > MaxCapaciteit && capaciteitNa <= MaxCapaciteit)
+                StrafIntern -= CapaciteitStrafLiter * (capaciteitVoor - MaxCapaciteit) + CapaciteitStraf;
+            else if (capaciteitVoor > MaxCapaciteit && capaciteitNa > MaxCapaciteit)
+                StrafIntern += CapaciteitStrafLiter * (capaciteitNa - capaciteitVoor);
         }
 
         public Truck this[int key]
