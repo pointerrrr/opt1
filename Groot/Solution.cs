@@ -10,13 +10,13 @@ namespace Groot
     {
         public Truck Truck1, Truck2;
         public Dictionary<int, ValidArray> ValidCheck;
-        private readonly double MaxRijtijdDag = 60d * 12d;
+        private readonly double MaxRijtijdDag = 0;// 60d * 12d;
         private readonly double MinRijtijdDag = 60d * 10d;
-        private readonly double RijtijdStraf = 5000000d;
-        private readonly double RijtijdStrafMinuut = 100000d;
-        private readonly double MaxCapaciteit = 100000d;
-        private readonly double CapaciteitStraf = 10000d;
-        private readonly double CapaciteitStrafLiter = 10d;
+        private readonly double RijtijdStraf = 0;//5000000d;
+        private readonly double RijtijdStrafMinuut = 0;//100000d;
+        private readonly double MaxCapaciteit = 0;//100000d;
+        private readonly double CapaciteitStraf = 0;//10000d;
+        private readonly double CapaciteitStrafLiter = 0;//10d;
 
         public double Value { get { return Rijtijd + Strafpunten + StrafIntern; } }
 
@@ -44,7 +44,7 @@ namespace Groot
             return res;
         }
 
-        public Solution RandomMutation(int max = 5)
+        public Solution RandomMutation(int max = 7)
         {
             Solution res = Copy();
 
@@ -325,12 +325,12 @@ namespace Groot
             if (validVoor)
             {
                 Strafpunten += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
-                StrafIntern += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
+                //StrafIntern += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
             }
             else if (validNa)
             {
                 Strafpunten -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
-                StrafIntern -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
+                //StrafIntern -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
             }
         }
 

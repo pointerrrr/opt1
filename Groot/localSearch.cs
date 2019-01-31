@@ -52,7 +52,33 @@ namespace Groot
 
                 Solution randomNeighbor = currentSolution.Copy().RandomMutation();
                 //lastDecrementFound++;
-                if (randomNeighbor.Value <= currentSolution.Value || acceptanceChance(currentSolution, randomNeighbor, T) >= RNG.NextDouble())
+                bool allow = true;
+                for (int j = 0; j < 5; j++)
+                {
+                    if(randomNeighbor.Truck1.Rijtijden[j] >= 12*60 || randomNeighbor.Truck2.Rijtijden[j] >= 12 * 60)
+                    {
+                        allow = false;
+                        goto Checked;
+                    }
+                    for (int k = 0; k < randomNeighbor.Truck1.Dagen[j].Count; k++)
+                    {
+                        if (randomNeighbor.Truck1.Dagen[j][k].Item2.Value > 100000)
+                        {
+                            allow = false;
+                            goto Checked;
+                        }
+                    }
+                    for (int k = 0; k < randomNeighbor.Truck2.Dagen[j].Count; k++)
+                    {
+                        if (randomNeighbor.Truck2.Dagen[j][k].Item2.Value > 100000)
+                        {
+                            allow = false;
+                            goto Checked;
+                        }
+                    }
+                }
+            Checked:
+                if (randomNeighbor.Value <= currentSolution.Value || (acceptanceChance(currentSolution, randomNeighbor, T) >= RNG.NextDouble() && allow))
                 {
                     currentSolution = randomNeighbor.Copy();
                     if (currentSolution.Value < bestSolution.Value)
