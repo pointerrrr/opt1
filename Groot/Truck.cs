@@ -99,15 +99,14 @@ namespace Groot
 
         public void AddDumpen(int dag, int route, int index)
         {
-            
             List<int> temp = new List<int>();
             temp.AddRange(Dagen[dag][route].Item1.Take(index));
+            if (temp.Count == 0)
+                return;
             Dagen[dag][route].Item1.RemoveRange(0, index);
             Dagen[dag].Add(new Tuple<List<int>, Capaciteit>(temp, new Capaciteit(0)));
 
             int nieuweRoute = Dagen[dag].Count - 1;
-            if (Dagen[dag][nieuweRoute].Item1.Count == 0)
-                return;
             int maxNieuweRoute = Dagen[dag][nieuweRoute].Item1.Count - 1;
 
             Rijtijden[dag] -= AfstandenMatrix[OrdersDict[Dagen[dag][nieuweRoute].Item1[maxNieuweRoute]].MatrixID, OrdersDict[Dagen[dag][route].Item1[0]].MatrixID].Rijtijd;
@@ -121,16 +120,17 @@ namespace Groot
 
         public void RemoveDumpen(int dag, int route)
         {
+            if (Dagen[dag].Count <= 1)
+                return;
             if (Dagen[dag][route].Item1.Count == 0)
             {
                 Dagen[dag].RemoveAt(route);
-                Rijtijden[dag] -= 30;
+                Rijtijden[dag] -= 30;                
             }
             else
             {
                 if (route >= Dagen[dag].Count - 1 || Dagen[dag][route + 1].Item1.Count == 0)
                     return;
-
 
                 int maxOud = Dagen[dag][route].Item1.Count - 1;
 

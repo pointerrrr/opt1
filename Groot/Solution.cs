@@ -44,7 +44,7 @@ namespace Groot
             return res;
         }
 
-        public Solution RandomMutation(int max = 2)
+        public Solution RandomMutation(int max = 5)
         {
             Solution res = Copy();
 
@@ -60,11 +60,11 @@ namespace Groot
                 case 1:
                     res.RemoveRandomOrder(truck);
                     break;
-                case 2:                    
-                    res.ShiftRandomOrderWithinRoute(truck);
+                case 2:
+                    res.AddDumpen(truck);                    
                     break;
                 case 3:
-                    res.AddDumpen(truck);
+                    res.RemoveDumpen(truck);
                     break;
                 case 4:
                     res.ShiftRandomOrderBetweenDays(truck);
@@ -73,10 +73,13 @@ namespace Groot
                     res.ShiftRandomOrderBetweenTrucks();
                     break;
                 case 6:
-                    res.TwoAndAHalfOpt(truck);
+                    res.ShiftRandomOrderWithinRoute(truck);
                     break;
                 case 7:
-                    res.RemoveDumpen(truck);
+                    res.TwoAndAHalfOpt(truck);
+                    break;
+                case 8:
+                    res.TwoOpt(truck);
                     break;
 
             }
@@ -169,12 +172,10 @@ namespace Groot
             plek1 = RNG.Next(truck.Dagen[dag][route].Item1.Count);
             plek1res = truck.Dagen[dag][route].Item1[plek1];
 
+            RemoveSpecificOrder(truck, dag, route, plek1);
+
             plek2 = RNG.Next(truck.Dagen[dag][route].Item1.Count);
 
-            if (plek1 == plek2)
-                return;
-
-            RemoveSpecificOrder(truck, dag, route, plek1);
             AddSpecificOrder(truck, dag, route, plek2, plek1res);
         }
 
@@ -281,6 +282,11 @@ namespace Groot
 
             RemoveSpecificOrder(Truck1, dag1, route1, plek1);
             AddSpecificOrder(Truck2, dag2, route2, plek2, plek1res);
+        }
+
+        public void TwoOpt(Truck truck)
+        {
+            // TODO
         }
 
         public void TwoAndAHalfOpt(Truck truck)
