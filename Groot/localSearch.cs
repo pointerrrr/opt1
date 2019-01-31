@@ -43,7 +43,7 @@ namespace Groot
 
             Solution bestSolution = currentSolution.Copy();
 
-            for (int i = 0; i < MaxIterations || lastDecrementFound < 1; i++)
+            for (int i = 0; i < MaxIterations/* || lastDecrementFound < 1*/; i++)
             {
                 if (i % Q == 0)
                 {
@@ -51,18 +51,18 @@ namespace Groot
                 }
 
                 Solution randomNeighbor = currentSolution.Copy().RandomMutation();
-                lastDecrementFound++;
+                //lastDecrementFound++;
                 if (randomNeighbor.Value <= currentSolution.Value || acceptanceChance(currentSolution, randomNeighbor, T) >= RNG.NextDouble())
                 {
                     currentSolution = randomNeighbor.Copy();
                     if (currentSolution.Value < bestSolution.Value)
                     {
                         bestSolution = randomNeighbor.Copy();
-                        lastDecrementFound = 0;
+                        //lastDecrementFound = 0;
                     }
                 }
             }
-
+            /*
             lastDecrementFound = 0;
             T = startT;
 
@@ -81,11 +81,11 @@ namespace Groot
                     currentSolution = randomNeighbor.Copy();
                     if (currentSolution.Value < bestSolution.Value)
                     {
-                        bestSolution = randomNeighbor.Copy();
+                        bestSolution = currentSolution.Copy();
                         lastDecrementFound = 0;
                     }
                 }
-            }
+            }*/
 
             return bestSolution;
         }
@@ -133,10 +133,10 @@ namespace Groot
             for (int i = 0; i < 5; i++)
             {
                 int index = RNG.Next(Orders.Length);
-                currentSolution[0].AddOrder(Orders[index].Value.Order, 0, i, 0);
+                currentSolution.AddSpecificOrder(currentSolution[0], i, 0, 0, Orders[index].Value.Order);
 
                 index = RNG.Next(0, Orders.Length);
-                currentSolution[1].AddOrder(Orders[index].Value.Order, 0, i, 0);
+                currentSolution.AddSpecificOrder(currentSolution[1], i, 0, 0, Orders[index].Value.Order);
 
 
                 int[] closest1 = ClosestBedrijven(1177, OrdersDict[currentSolution[0].Dagen[i][0].Item1[0]].MatrixID);

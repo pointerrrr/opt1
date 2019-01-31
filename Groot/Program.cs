@@ -40,9 +40,10 @@ namespace Groot
             Truck truck2 = solution.Truck2;
             for (int i = 0; i < 5; i++)
             {
+                int n = 1;
                 for (int j = 0; j < truck1.Dagen[i].Count; j++)
                 {
-                    int n = 1;
+                    
                     for (int k = 0; k < truck1.Dagen[i][j].Item1.Count; k++)
                     {
                         
@@ -52,17 +53,16 @@ namespace Groot
                     Console.WriteLine("1; " + (i + 1) + "; " + (n++) + "; " + 0);
                     
                 }
-                    
+                n = 1;
                 for (int j = 0; j < truck2.Dagen[i].Count; j++)
                 {
-                    int n = 1;
-                    for (int k = 0; k < truck1.Dagen[i][j].Item1.Count; k++)
+                    for (int k = 0; k < truck2.Dagen[i][j].Item1.Count; k++)
                     {
 
-                        Console.WriteLine("1; " + (i + 1) + "; " + (n++) + "; " + truck1.Dagen[i][j].Item1[k]);
+                        Console.WriteLine("2; " + (i + 1) + "; " + (n++) + "; " + truck2.Dagen[i][j].Item1[k]);
                     }
 
-                    Console.WriteLine("1; " + (i + 1) + "; " + (n++) + "; " + 0);
+                    Console.WriteLine("2; " + (i + 1) + "; " + (n++) + "; " + 0);
                 }
             }
         }

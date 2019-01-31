@@ -26,6 +26,7 @@ namespace Groot
         {
             Truck1 = new Truck();
             Truck2 = new Truck();
+            Rijtijd = 300;
         }
 
         public Solution Copy()
@@ -43,7 +44,7 @@ namespace Groot
             return res;
         }
 
-        public Solution RandomMutation(int max = 7)
+        public Solution RandomMutation(int max = 2)
         {
             Solution res = Copy();
 
@@ -54,13 +55,13 @@ namespace Groot
             switch (choice)
             {
                 case 0:
-                    res.ShiftRandomOrderWithinRoute(truck);
+                    res.AddRandomOrder(truck);
                     break;
                 case 1:
                     res.RemoveRandomOrder(truck);
                     break;
                 case 2:                    
-                    res.AddRandomOrder(truck);
+                    res.ShiftRandomOrderWithinRoute(truck);
                     break;
                 case 3:
                     res.AddDumpen(truck);
@@ -73,6 +74,9 @@ namespace Groot
                     break;
                 case 6:
                     res.TwoAndAHalfOpt(truck);
+                    break;
+                case 7:
+                    res.RemoveDumpen(truck);
                     break;
 
             }
@@ -117,7 +121,7 @@ namespace Groot
         {
             int dag = RNG.Next(5);
 
-            if (truck.Dagen[dag].Count < 3)
+            if (truck.Dagen[dag].Count < 1)
                 return;
 
             int route = RNG.Next(truck.Dagen[dag].Count);
@@ -162,8 +166,6 @@ namespace Groot
             if (truck.Dagen[dag][route].Item1.Count < 1)
                 return;
 
-            double oudRijtijd = truck.Rijtijden[dag];
-
             plek1 = RNG.Next(truck.Dagen[dag][route].Item1.Count);
             plek1res = truck.Dagen[dag][route].Item1[plek1];
 
@@ -189,8 +191,6 @@ namespace Groot
             if (truck.Dagen[dag][route1].Item1.Count < 1 || truck.Dagen[dag][route2].Item1.Count < 1)
                 return;
 
-            double oudRijtijd = truck.Rijtijden[dag];
-
             plek1 = RNG.Next(truck.Dagen[dag][route1].Item1.Count);
             plek1res = truck.Dagen[dag][route1].Item1[plek1];
 
@@ -205,12 +205,15 @@ namespace Groot
             int dag = RNG.Next(5);
             int route = RNG.Next(truck.Dagen[dag].Count);
 
+            double oudRijtijd = truck.Rijtijden[dag];
+
             if (truck.Dagen[dag][route].Item1.Count < 3)
                 return;
 
             int index = RNG.Next(truck.Dagen[dag][route].Item1.Count - 1);
 
             truck.AddDumpen(dag, route, index);
+            Rijtijd += truck.Rijtijden[dag] - oudRijtijd;
         }
 
         public void RemoveDumpen(Truck truck)
@@ -218,10 +221,10 @@ namespace Groot
             int dag = RNG.Next(5);
             int route = RNG.Next(truck.Dagen[dag].Count);
 
-            if (truck.Dagen[dag][route].Item1.Count < 3)
-                return;
+            double oudRijtijd = truck.Rijtijden[dag];
 
             truck.RemoveDumpen(dag, route);
+            Rijtijd += truck.Rijtijden[dag] - oudRijtijd;
         }
 
         public void ShiftRandomOrderBetweenDays(Truck truck)

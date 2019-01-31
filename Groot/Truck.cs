@@ -19,6 +19,7 @@ namespace Groot
             Rijtijden = new double[5];
             for(int i = 0; i < 5; i++)
             {
+                Rijtijden[i] = 30;
                 Dagen[i] = new List<Tuple<List<int>, Capaciteit>>();
                 Dagen[i].Add(new Tuple<List<int>, Capaciteit>(new List<int>(), new Capaciteit(0)));
             }
@@ -28,13 +29,18 @@ namespace Groot
         {
             Truck res = new Truck();
             for (int i = 0; i < 5; i++)
+            {
                 for (int j = 0; j < Dagen[i].Count; j++)
                 {
-                    res.Dagen[i].Add(new Tuple<List<int>, Capaciteit>(new List<int>(), new Capaciteit(Dagen[i][j].Item2.Value)));
+                    if (j != 0)
+                        res.Dagen[i].Add(new Tuple<List<int>, Capaciteit>(new List<int>(), new Capaciteit(Dagen[i][j].Item2.Value)));
+                    else
+                        res.Dagen[i][0].Item2.SetValue(Dagen[i][0].Item2.Value);
                     for (int k = 0; k < Dagen[i][j].Item1.Count; k++)
                         res.Dagen[i][j].Item1.Add(Dagen[i][j].Item1[k]);
                 }
-            Rijtijden.CopyTo(res.Rijtijden, 0);
+                res.Rijtijden[i] = Rijtijden[i];
+            }
             return res;
         }
 
@@ -42,7 +48,7 @@ namespace Groot
         {
             int a = 0, b = 0, c = 0;
 
-            if (index == 0 || Dagen[dag][route].Item1[index -1] == 0)
+            if (index == 0)
                 a = 287;
             else
                 a = OrdersDict[Dagen[dag][route].Item1[index - 1]].MatrixID;
@@ -50,7 +56,7 @@ namespace Groot
             b = OrdersDict[orderId].MatrixID;
             Rijtijden[dag] += OrdersDict[orderId].LedigingDuurMinuten;
 
-            if (index >= Dagen[dag][route].Item1.Count - 1)
+            if (index >= Dagen[dag][route].Item1.Count)
                 c = 287;
             else
                 c = OrdersDict[Dagen[dag][route].Item1[index]].MatrixID;
@@ -58,8 +64,8 @@ namespace Groot
             Rijtijden[dag] -= AfstandenMatrix[a, c].Rijtijd;
             Rijtijden[dag] += AfstandenMatrix[a, b].Rijtijd;
             Rijtijden[dag] += AfstandenMatrix[b, c].Rijtijd;
-
-            Dagen[dag][route].Item2.SetValue(Dagen[dag][route].Item2.Value + OrdersDict[orderId].AantContainers * OrdersDict[orderId].VolumePerContainer);
+            double newValue = Dagen[dag][route].Item2.Value + OrdersDict[orderId].AantContainers * (double)OrdersDict[orderId].VolumePerContainer;
+            Dagen[dag][route].Item2.SetValue(newValue);
 
             Dagen[dag][route].Item1.Insert(index, orderId);
         }
@@ -70,7 +76,7 @@ namespace Groot
 
             int orderId = Dagen[dag][route].Item1[index];
 
-            if (index == 0 || Dagen[dag][route].Item1[index - 1] == 0)
+            if (index == 0)
                 a = 287;
             else
                 a = OrdersDict[Dagen[dag][route].Item1[index - 1]].MatrixID;
@@ -78,7 +84,7 @@ namespace Groot
             b = OrdersDict[orderId].MatrixID;
             Rijtijden[dag] -= OrdersDict[orderId].LedigingDuurMinuten;
 
-            if (index + 1 >= Dagen[dag][route].Item1.Count - 1)
+            if (index + 1 >= Dagen[dag][route].Item1.Count)
                 c = 287;
             else
                 c = OrdersDict[Dagen[dag][route].Item1[index + 1]].MatrixID;
@@ -87,23 +93,27 @@ namespace Groot
             Rijtijden[dag] -= AfstandenMatrix[a, b].Rijtijd;
             Rijtijden[dag] -= AfstandenMatrix[b, c].Rijtijd;
 
-            Dagen[dag][route].Item2.SetValue(Dagen[dag][route].Item2.Value - OrdersDict[Dagen[dag][route].Item1[index]].AantContainers * OrdersDict[Dagen[dag][route].Item1[index]].VolumePerContainer);
+            Dagen[dag][route].Item2.SetValue(Dagen[dag][route].Item2.Value - OrdersDict[Dagen[dag][route].Item1[index]].AantContainers * (double)OrdersDict[Dagen[dag][route].Item1[index]].VolumePerContainer);
             Dagen[dag][route].Item1.RemoveAt(index);
         }
 
         public void AddDumpen(int dag, int route, int index)
         {
+            
             List<int> temp = new List<int>();
             temp.AddRange(Dagen[dag][route].Item1.Take(index));
             Dagen[dag][route].Item1.RemoveRange(0, index);
             Dagen[dag].Add(new Tuple<List<int>, Capaciteit>(temp, new Capaciteit(0)));
 
             int nieuweRoute = Dagen[dag].Count - 1;
+            if (Dagen[dag][nieuweRoute].Item1.Count == 0)
+                return;
             int maxNieuweRoute = Dagen[dag][nieuweRoute].Item1.Count - 1;
 
             Rijtijden[dag] -= AfstandenMatrix[OrdersDict[Dagen[dag][nieuweRoute].Item1[maxNieuweRoute]].MatrixID, OrdersDict[Dagen[dag][route].Item1[0]].MatrixID].Rijtijd;
             Rijtijden[dag] += AfstandenMatrix[287, OrdersDict[Dagen[dag][route].Item1[0]].MatrixID].Rijtijd;
             Rijtijden[dag] += AfstandenMatrix[OrdersDict[Dagen[dag][nieuweRoute].Item1[maxNieuweRoute]].MatrixID, 287].Rijtijd;
+            Rijtijden[dag] += 30;
 
             Dagen[dag][nieuweRoute].Item2.SetValue(getCapaciteit(dag, nieuweRoute));
             Dagen[dag][route].Item2.SetValue(Dagen[dag][route].Item2.Value - Dagen[dag][nieuweRoute].Item2.Value);
@@ -111,25 +121,34 @@ namespace Groot
 
         public void RemoveDumpen(int dag, int route)
         {
-            if (route >= Dagen[dag].Count - 1)
-                return;
+            if (Dagen[dag][route].Item1.Count == 0)
+            {
+                Dagen[dag].RemoveAt(route);
+                Rijtijden[dag] -= 30;
+            }
+            else
+            {
+                if (route >= Dagen[dag].Count - 1 || Dagen[dag][route + 1].Item1.Count == 0)
+                    return;
 
-            int maxOud = Dagen[dag][route].Item1.Count - 1;
 
-            Rijtijden[dag] -= AfstandenMatrix[287, OrdersDict[Dagen[dag][route + 1].Item1[0]].MatrixID].Rijtijd;
-            Rijtijden[dag] -= AfstandenMatrix[OrdersDict[Dagen[dag][route].Item1[maxOud]].MatrixID, 287].Rijtijd;
-            Rijtijden[dag] += AfstandenMatrix[OrdersDict[Dagen[dag][route].Item1[maxOud]].MatrixID, OrdersDict[Dagen[dag][route + 1].Item1[0]].MatrixID].Rijtijd;
-            
-            Dagen[dag][route].Item1.AddRange(Dagen[dag][route + 1].Item1);
-            Dagen[dag][route].Item2.SetValue(Dagen[dag][route].Item2.Value + Dagen[dag][route + 1].Item2.Value);
-            Dagen[dag].RemoveAt(route + 1);
+                int maxOud = Dagen[dag][route].Item1.Count - 1;
 
+                Rijtijden[dag] -= AfstandenMatrix[287, OrdersDict[Dagen[dag][route + 1].Item1[0]].MatrixID].Rijtijd;
+                Rijtijden[dag] -= AfstandenMatrix[OrdersDict[Dagen[dag][route].Item1[maxOud]].MatrixID, 287].Rijtijd;
+                Rijtijden[dag] += AfstandenMatrix[OrdersDict[Dagen[dag][route].Item1[maxOud]].MatrixID, OrdersDict[Dagen[dag][route + 1].Item1[0]].MatrixID].Rijtijd;
+                Rijtijden[dag] -= 30;
+
+                Dagen[dag][route].Item1.AddRange(Dagen[dag][route + 1].Item1);
+                Dagen[dag][route].Item2.SetValue(Dagen[dag][route].Item2.Value + Dagen[dag][route + 1].Item2.Value);
+                Dagen[dag].RemoveAt(route + 1);
+            }
         }
 
         public double getRijTijd(int dag)
         {
             double res = Rijtijden[dag];
-            res += 30 * Dagen[dag].Count;
+            //res += 30 * Dagen[dag].Count;
 
             return res;
         }
@@ -148,7 +167,7 @@ namespace Groot
         }
     }
 
-    public struct Capaciteit
+    public class Capaciteit
     {
         public double Value;
 
