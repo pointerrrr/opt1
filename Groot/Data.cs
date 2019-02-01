@@ -13,6 +13,14 @@ namespace Groot
 
         public static Random RNG = new Random();
 
+        public readonly static double MaxRijtijdDag = 0;// 60d * 12d;
+        public readonly static double MinRijtijdDag = 60d * 10d;
+        public readonly static double RijtijdStraf = 0;//5000000d;
+        public readonly static double RijtijdStrafMinuut = 0;//100000d;
+        public readonly static double MaxCapaciteit = 0;//100000d;
+        public readonly static double CapaciteitStraf = 0;//10000d;
+        public readonly static double CapaciteitStrafLiter = 0;//10d;
+
         static Data()
         {
             AfstandenMatrix = afstandRijTijdInladen();

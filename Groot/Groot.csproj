@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AfstandRijtijd.cs" />
+    <Compile Include="SolutionData.cs" />
     <Compile Include="Data.cs" />
     <Compile Include="LocalSearch.cs" />
     <Compile Include="OrderDescription.cs" />

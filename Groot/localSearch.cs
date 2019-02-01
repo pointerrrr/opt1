@@ -50,42 +50,45 @@ namespace Groot
                     T *= 0.99d;
                 }
 
-                Solution randomNeighbor = currentSolution.Copy().RandomMutation();
-                //lastDecrementFound++;
-                bool allow = true;
-                for (int j = 0; j < 5; j++)
+                SolutionData newData = new SolutionData(currentSolution, RNG.Next(7));
+                if (newData.Value <= currentSolution.Value || acceptanceChance(currentSolution.Value, newData.Value, T) >= RNG.NextDouble())
                 {
-                    if(randomNeighbor.Truck1.Rijtijden[j] >= 12*60 || randomNeighbor.Truck2.Rijtijden[j] >= 12 * 60)
+                    currentSolution.Mutation(newData);
+
+                    //Solution randomNeighbor = currentSolution.Copy.RandomMutation();
+                    //lastDecrementFound++;
+                    bool allow = true;
+                    for (int j = 0; j < 5; j++)
                     {
-                        allow = false;
-                        goto Checked;
-                    }
-                    for (int k = 0; k < randomNeighbor.Truck1.Dagen[j].Count; k++)
-                    {
-                        if (randomNeighbor.Truck1.Dagen[j][k].Item2.Value > 100000)
+                        if (currentSolution.Truck1.Rijtijden[j] >= 12 * 60 || currentSolution.Truck2.Rijtijden[j] >= 12 * 60)
                         {
                             allow = false;
                             goto Checked;
                         }
-                    }
-                    for (int k = 0; k < randomNeighbor.Truck2.Dagen[j].Count; k++)
-                    {
-                        if (randomNeighbor.Truck2.Dagen[j][k].Item2.Value > 100000)
+                        for (int k = 0; k < currentSolution.Truck1.Dagen[j].Count; k++)
                         {
-                            allow = false;
-                            goto Checked;
+                            if (currentSolution.Truck1.Dagen[j][k].Item2.Value > 100000)
+                            {
+                                allow = false;
+                                goto Checked;
+                            }
+                        }
+                        for (int k = 0; k < currentSolution.Truck2.Dagen[j].Count; k++)
+                        {
+                            if (currentSolution.Truck2.Dagen[j][k].Item2.Value > 100000)
+                            {
+                                allow = false;
+                                goto Checked;
+                            }
                         }
                     }
-                }
-            Checked:
-                if (randomNeighbor.Value <= currentSolution.Value || (acceptanceChance(currentSolution, randomNeighbor, T) >= RNG.NextDouble() && allow))
-                {
-                    currentSolution = randomNeighbor.Copy();
-                    if (currentSolution.Value < bestSolution.Value)
-                    {
-                        bestSolution = randomNeighbor.Copy();
-                        //lastDecrementFound = 0;
-                    }
+                Checked:
+                    if (newData.Value <= currentSolution.Value || allow)
+                        if (currentSolution.Value < bestSolution.Value)
+                        {
+                            bestSolution = currentSolution.Copy();
+                            //lastDecrementFound = 0;
+                        }
                 }
             }
             /*
@@ -117,18 +120,16 @@ namespace Groot
         }
 
         double[] reses = new double[1000];
+        double avg = 0;
         int counter = 0;
-        private double acceptanceChance(Solution currentSolution, Solution randomNeighbor, double T)
+        private double acceptanceChance(double currentValue, double newValue, double T)
         {
-            double res = Math.Exp(((currentSolution.Value - randomNeighbor.Value)) / T);
+            double res = Math.Exp((currentValue - newValue) / T);
             if(counter < 1000)
-            {
                 reses[counter++] = res;
-            }
             else
-            {
-                double avg = reses.Average();
-            }
+                avg = reses.Average();
+
             return res;
         }
 
