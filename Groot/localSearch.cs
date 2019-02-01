@@ -49,7 +49,7 @@ namespace Groot
                     T *= 0.99d;
                 }
 
-                SolutionData newData = new SolutionData(currentSolution, RNG.Next(7));
+                SolutionData newData = new SolutionData(currentSolution, RNG.Next(8));
                 if (newData.Value <= currentSolution.Value || acceptanceChance(currentSolution.Value, newData.Value, T) >= RNG.NextDouble())
                 {
                     bool allow = true;

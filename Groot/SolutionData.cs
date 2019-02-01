@@ -356,7 +356,9 @@ namespace Groot
             Capaciteit1 = new Capaciteit(t.Dagen[dag1][route1].Item2.Value);
             Capaciteit2 = new Capaciteit(t.Dagen[dag2][route2].Item2.Value);
             RemoveSpecificOrder(t, dag1, route1, index1, Capaciteit1, Truck1Rijtijden);
+            SolValidCheck[order1][dag1]--;
             AddSpecificOrder(t, dag2, order1, route2, index2, Capaciteit1, Truck1Rijtijden);
+            SolValidCheck[order1][dag1]++;
         }
 
         void ShiftRandomOrderBetweenTrucks()
@@ -393,8 +395,12 @@ namespace Groot
             Capaciteit1 = new Capaciteit(Truck1.Dagen[dag1][route1].Item2.Value);
             Capaciteit2 = new Capaciteit(Truck2.Dagen[dag2][route2].Item2.Value);
             RemoveSpecificOrder(Truck1, dag1, route1, index1, Capaciteit1, Truck1Rijtijden);
-            if(accepted)
+            if (accepted)
+            {
+                SolValidCheck[order1][dag1]--;
                 AddSpecificOrder(Truck2, dag2, order1, route2, index2, Capaciteit2, Truck2Rijtijden);
+                SolValidCheck[order1][dag1]++;
+            }
         }
 
         void ShiftRandomOrderWithinRoute()
@@ -403,7 +409,6 @@ namespace Groot
             truck = RNG.Next(2);
             t = oldSolution[truck];
 
-            SolutionStrafpunten = oldSolution.Strafpunten;
             SolutionStrafIntern = oldSolution.StrafIntern;
             SolutionRijtijd = oldSolution.Rijtijd;
             SolValidCheck = oldSolution.ValidCheck;
@@ -444,7 +449,6 @@ namespace Groot
                 {
                     AddSpecificOrder(t, dag1, order1, route1, index2, Capaciteit1, Truck1Rijtijden);
                 }
-
         }
 
         void ShiftRandomOrderBetweenRoutes()
@@ -456,7 +460,6 @@ namespace Groot
             else
                 t = oldSolution.Truck2;
 
-            SolutionStrafpunten = oldSolution.Strafpunten;
             SolutionStrafIntern = oldSolution.StrafIntern;
             SolutionRijtijd = oldSolution.Rijtijd;
             SolValidCheck = oldSolution.ValidCheck;

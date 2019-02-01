@@ -114,7 +114,6 @@ namespace Groot
                 truck.AddOrder(data.order1, data.index2, data.dag1, data.route1, data.Capaciteit1.Value);
 
             truck.Rijtijden = data.Truck1Rijtijden;
-            Strafpunten = data.SolutionStrafpunten;
             StrafIntern = data.SolutionStrafIntern;
             Rijtijd = data.SolutionRijtijd;
         }
@@ -125,7 +124,6 @@ namespace Groot
             truck.AddOrder(data.order1, data.index2, data.dag1, data.route2, data.Capaciteit2.Value);
 
             truck.Rijtijden = data.Truck1Rijtijden;
-            Strafpunten = data.SolutionStrafpunten;
             StrafIntern = data.SolutionStrafIntern;
             Rijtijd = data.SolutionRijtijd;
         }
@@ -135,7 +133,6 @@ namespace Groot
             truck.AddDumpen(data.dag1, data.route1, data.index1, data.Capaciteit1.Value, data.Capaciteit2.Value);
 
             truck.Rijtijden = data.Truck1Rijtijden;
-            Strafpunten = data.SolutionStrafpunten;
             StrafIntern = data.SolutionStrafIntern;
             Rijtijd = data.SolutionRijtijd;
         }
@@ -145,7 +142,6 @@ namespace Groot
             truck.RemoveDumpen(data.dag1, data.route1, data.Capaciteit1.Value);
 
             truck.Rijtijden = data.Truck1Rijtijden;
-            Strafpunten = data.SolutionStrafpunten;
             StrafIntern = data.SolutionStrafIntern;
             Rijtijd = data.SolutionRijtijd;
         }
@@ -202,7 +198,6 @@ namespace Groot
             bool validVoor = ValidCheck[order].Valid;
             ValidCheck[order][dag]++;
             bool validNa = ValidCheck[order].Valid;
-            ValidCheck[order][dag]--;
 
             UpdateValid(order, validVoor, validNa);
 
