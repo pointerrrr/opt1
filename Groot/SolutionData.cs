@@ -68,8 +68,8 @@ namespace Groot
 
         void AddSpecificOrder(Truck t, int dag, int orderId, int route, int index, Capaciteit cap, double[] rijtijden, int a = -1, int c = -1)
         {
-            double capaciteitVoor = t.Dagen[dag][route].Item2.Value;
-            cap = new Capaciteit(capaciteitVoor + OrdersDict[orderId].VolumePerContainer * OrdersDict[orderId].AantContainers);
+            double capaciteitVoor = cap.Value;
+            cap.SetValue(capaciteitVoor + OrdersDict[orderId].VolumePerContainer * OrdersDict[orderId].AantContainers);
             UpdateCapaciteit(capaciteitVoor, Capaciteit1.Value);
 
             bool validVoor = SolValidCheck[orderId].Valid;
@@ -123,8 +123,8 @@ namespace Groot
             UpdateValid(orderId, validVoor, validNa);
 
             double capaciteitVoor = t.Dagen[dag][route].Item2.Value;
-            cap = new Capaciteit(capaciteitVoor - OrdersDict[orderId].AantContainers * OrdersDict[orderId].VolumePerContainer);
-            UpdateCapaciteit(capaciteitVoor, Capaciteit1.Value);
+            cap.SetValue(capaciteitVoor - OrdersDict[orderId].AantContainers * OrdersDict[orderId].VolumePerContainer);
+            UpdateCapaciteit(capaciteitVoor, cap.Value);
 
             double oudRijtijd = rijtijden[dag];
 

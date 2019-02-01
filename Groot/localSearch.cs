@@ -42,14 +42,14 @@ namespace Groot
             AddCloud(currentSolution);
 
             Solution bestSolution = currentSolution.Copy();
-            for (int i = 0; i < MaxIterations/* || lastDecrementFound < 1*/; i++)
+            for (int i = 0; i < MaxIterations /* || lastDecrementFound < 1*/; i++)
             {
                 if (i % Q == 0)
                 {
                     T *= 0.99d;
                 }
 
-                SolutionData newData = new SolutionData(currentSolution, RNG.Next(8));
+                SolutionData newData = new SolutionData(currentSolution, RNG.Next(2));
                 if (newData.Value <= currentSolution.Value || acceptanceChance(currentSolution.Value, newData.Value, T) >= RNG.NextDouble())
                 {
                     bool allow = true;
@@ -97,7 +97,7 @@ namespace Groot
                         }
                     }
                 Checked:
-                    if (newData.Value <= currentSolution.Value || allow)
+                    if (newData.Value <= currentSolution.Value && allow)
                         if (currentSolution.Value < bestSolution.Value)
                         {
                             bestSolution = currentSolution.Copy();

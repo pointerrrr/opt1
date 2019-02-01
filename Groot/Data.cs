@@ -11,7 +11,7 @@ namespace Groot
         public readonly static KeyValuePair<int, OrderDescription>[] Orders;
         public readonly static AfstandRijtijd[,] AfstandenMatrix;
 
-        public static Random RNG = new Random();
+        public static Random RNG = new Random(1337);
 
         public readonly static double MaxRijtijdDag = 0;// 60d * 12d;
         public readonly static double MinRijtijdDag = 60d * 10d;
