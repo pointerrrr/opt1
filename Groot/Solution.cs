@@ -43,7 +43,6 @@ namespace Groot
             Truck truck = this[0];
             if(choice != 5)
             {
-                data.truck = RNG.Next(2);
                 truck = this[data.truck];
             }
                 
@@ -109,7 +108,10 @@ namespace Groot
         public void ShiftRandomOrderWithinRoute(Truck truck, SolutionData data)
         {
             truck.RemoveOrder(data.index1, data.dag1, data.route1, data.Capaciteit1.Value);
-            truck.AddOrder(data.order1, data.index2, data.dag1, data.route1, data.Capaciteit1.Value);
+            if(data.index2 >= data.index1)
+                truck.AddOrder(data.order1, data.index2 - 1, data.dag1, data.route1, data.Capaciteit1.Value);
+            else
+                truck.AddOrder(data.order1, data.index2, data.dag1, data.route1, data.Capaciteit1.Value);
 
             truck.Rijtijden = data.Truck1Rijtijden;
             Strafpunten = data.SolutionStrafpunten;
@@ -168,7 +170,7 @@ namespace Groot
             Truck Truck1 = this[swapTo];
             Truck Truck2 = this[swapFrom];
 
-            Truck1.RemoveOrder(data.dag1, data.route1, data.index1, data.Capaciteit1.Value);
+            Truck1.RemoveOrder(data.index1, data.dag1, data.route1, data.Capaciteit1.Value);
             Truck2.AddOrder(data.order1, data.index2, data.dag2, data.route2, data.Capaciteit2.Value);
 
             Truck1.Rijtijden = data.Truck1Rijtijden;

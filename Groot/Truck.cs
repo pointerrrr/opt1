@@ -39,8 +39,9 @@ namespace Groot
                     for (int k = 0; k < Dagen[i][j].Item1.Count; k++)
                         res.Dagen[i][j].Item1.Add(Dagen[i][j].Item1[k]);
                 }
-                res.Rijtijden[i] = Rijtijden[i];
+                
             }
+            Rijtijden.CopyTo(res.Rijtijden, 0);
             return res;
         }
 
@@ -60,8 +61,6 @@ namespace Groot
         {
             List<int> temp = new List<int>();
             temp.AddRange(Dagen[dag][route].Item1.Take(index));
-            if (temp.Count == 0)
-                return;
             Dagen[dag][route].Item1.RemoveRange(0, index);
             Dagen[dag].Add(new Tuple<List<int>, Capaciteit>(temp, new Capaciteit(newCap1)));
             Dagen[dag][route].Item2.SetValue(newCap2);

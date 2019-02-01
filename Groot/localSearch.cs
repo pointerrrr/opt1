@@ -33,7 +33,7 @@ namespace Groot
             return res;
         }
 
-        int lastDecrementFound = 0;
+        public static int lastDecrementFound = 0;
 
         public Solution FindSolution()
         {
@@ -42,7 +42,6 @@ namespace Groot
             AddCloud(currentSolution);
 
             Solution bestSolution = currentSolution.Copy();
-
             for (int i = 0; i < MaxIterations/* || lastDecrementFound < 1*/; i++)
             {
                 if (i % Q == 0)
@@ -53,11 +52,26 @@ namespace Groot
                 SolutionData newData = new SolutionData(currentSolution, RNG.Next(7));
                 if (newData.Value <= currentSolution.Value || acceptanceChance(currentSolution.Value, newData.Value, T) >= RNG.NextDouble())
                 {
+                    bool allow = true;
+                    if (!newData.accepted)
+                        continue;
+                        
+                    
                     currentSolution.Mutation(newData);
+
+                    double calcRijtijden = 0;
+                    for (int j = 0; j < 5; j++)
+                    {
+                        calcRijtijden += currentSolution.Truck1.Rijtijden[j];
+                        calcRijtijden += currentSolution.Truck2.Rijtijden[j];
+                    }
+
+                    if (calcRijtijden - currentSolution.Rijtijd > 1)
+                        ;
 
                     //Solution randomNeighbor = currentSolution.Copy.RandomMutation();
                     //lastDecrementFound++;
-                    bool allow = true;
+
                     for (int j = 0; j < 5; j++)
                     {
                         if (currentSolution.Truck1.Rijtijden[j] >= 12 * 60 || currentSolution.Truck2.Rijtijden[j] >= 12 * 60)
@@ -87,7 +101,6 @@ namespace Groot
                         if (currentSolution.Value < bestSolution.Value)
                         {
                             bestSolution = currentSolution.Copy();
-                            //lastDecrementFound = 0;
                         }
                 }
             }
