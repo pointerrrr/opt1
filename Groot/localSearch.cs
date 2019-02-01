@@ -39,7 +39,7 @@ namespace Groot
         {
             Solution currentSolution = GetStartSolution();
 
-            AddCloud(currentSolution);
+            //AddCloud(currentSolution);
 
             Solution bestSolution = currentSolution.Copy();
             for (int i = 0; i < MaxIterations /* || lastDecrementFound < 1*/; i++)
@@ -49,59 +49,19 @@ namespace Groot
                     T *= 0.99d;
                 }
 
-                SolutionData newData = new SolutionData(currentSolution, RNG.Next(2));
-                if (newData.Value <= currentSolution.Value || acceptanceChance(currentSolution.Value, newData.Value, T) >= RNG.NextDouble())
+                SolutionData newData = new SolutionData(currentSolution, RNG.Next(8));
+                if ((newData.Value <= currentSolution.Value || acceptanceChance(currentSolution.Value, newData.Value, T) >= RNG.NextDouble()) && newData.allow)
                 {
-                    bool allow = true;
                     if (!newData.accepted)
                         continue;
                         
                     
                     currentSolution.Mutation(newData);
-
-                    double calcRijtijden = 0;
-                    for (int j = 0; j < 5; j++)
+                    
+                    if (currentSolution.Value < bestSolution.Value)
                     {
-                        calcRijtijden += currentSolution.Truck1.Rijtijden[j];
-                        calcRijtijden += currentSolution.Truck2.Rijtijden[j];
+                        bestSolution = currentSolution.Copy();
                     }
-
-                    if (calcRijtijden - currentSolution.Rijtijd > 1)
-                        ;
-
-                    //Solution randomNeighbor = currentSolution.Copy.RandomMutation();
-                    //lastDecrementFound++;
-
-                    for (int j = 0; j < 5; j++)
-                    {
-                        if (currentSolution.Truck1.Rijtijden[j] >= 12 * 60 || currentSolution.Truck2.Rijtijden[j] >= 12 * 60)
-                        {
-                            allow = false;
-                            goto Checked;
-                        }
-                        for (int k = 0; k < currentSolution.Truck1.Dagen[j].Count; k++)
-                        {
-                            if (currentSolution.Truck1.Dagen[j][k].Item2.Value > 100000)
-                            {
-                                allow = false;
-                                goto Checked;
-                            }
-                        }
-                        for (int k = 0; k < currentSolution.Truck2.Dagen[j].Count; k++)
-                        {
-                            if (currentSolution.Truck2.Dagen[j][k].Item2.Value > 100000)
-                            {
-                                allow = false;
-                                goto Checked;
-                            }
-                        }
-                    }
-                Checked:
-                    if (newData.Value <= currentSolution.Value && allow)
-                        if (currentSolution.Value < bestSolution.Value)
-                        {
-                            bestSolution = currentSolution.Copy();
-                        }
                 }
             }
             /*
@@ -182,13 +142,13 @@ namespace Groot
                 int[] closest1 = ClosestBedrijven(1177, OrdersDict[currentSolution[0].Dagen[i][0].Item1[0]].MatrixID);
                 int[] closest2 = ClosestBedrijven(1177, OrdersDict[currentSolution[1].Dagen[i][0].Item1[0]].MatrixID);
                 int j = 0;
-                while (currentSolution[0].Rijtijden[i] < 660)
+                while (currentSolution[0].Rijtijden[i] < 600 && currentSolution[0].Dagen[i][0].Item2.Value < 75000)
                 {
                     currentSolution.AddSpecificOrder(currentSolution[0], i, 0, j + 1, closest1[j]);
                     j++;
                 }
                 j = 0;
-                while (currentSolution[1].Rijtijden[i] < 660)
+                while (currentSolution[1].Rijtijden[i] < 600 && currentSolution[1].Dagen[i][0].Item2.Value < 75000)
                 {
                     currentSolution.AddSpecificOrder(currentSolution[1], i, 0, j + 1, closest2[j]);
                     j++;

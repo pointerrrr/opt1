@@ -15,7 +15,7 @@ namespace Groot
         public Dictionary<int, ValidArray> SolValidCheck;
         public double SolutionRijtijd, SolutionStrafpunten, SolutionStrafIntern;
         public int Choice, truck, dag1, dag2, route1, route2, index1, index2, order1, order2;
-        public bool accepted = true;
+        public bool accepted = true, allow = true;
 
         public double Value
         {
@@ -64,13 +64,25 @@ namespace Groot
                     break;
 
             }
+
+            for (int j = 0; j < 5; j++)
+            {
+                if (Truck1Rijtijden[j] > MaxRijtijdDag || Truck2Rijtijden[j] > MaxRijtijdDag)
+                {
+                    allow = false;
+                }
+            }
+            if ((Capaciteit1 != null && Capaciteit1.Value > MaxCapaciteit) || ( Capaciteit2 != null && Capaciteit2.Value > MaxCapaciteit))
+                allow = false;
+
+
         }
 
         void AddSpecificOrder(Truck t, int dag, int orderId, int route, int index, Capaciteit cap, double[] rijtijden, int a = -1, int c = -1)
         {
             double capaciteitVoor = cap.Value;
             cap.SetValue(capaciteitVoor + OrdersDict[orderId].VolumePerContainer * OrdersDict[orderId].AantContainers);
-            UpdateCapaciteit(capaciteitVoor, Capaciteit1.Value);
+            UpdateCapaciteit(capaciteitVoor, cap.Value);
 
             bool validVoor = SolValidCheck[orderId].Valid;
             SolValidCheck[orderId][dag]++;
@@ -357,7 +369,7 @@ namespace Groot
             Capaciteit2 = new Capaciteit(t.Dagen[dag2][route2].Item2.Value);
             RemoveSpecificOrder(t, dag1, route1, index1, Capaciteit1, Truck1Rijtijden);
             SolValidCheck[order1][dag1]--;
-            AddSpecificOrder(t, dag2, order1, route2, index2, Capaciteit1, Truck1Rijtijden);
+            AddSpecificOrder(t, dag2, order1, route2, index2, Capaciteit2, Truck1Rijtijden);
             SolValidCheck[order1][dag1]++;
         }
 
