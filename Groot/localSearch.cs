@@ -39,7 +39,7 @@ namespace Groot
             }*/
             /*SolutionData newData2 = new SolutionData(res, RNG.Next(2, 6));
             res.Mutation(newData2);*/
-            //res.startOplossingInladen("../../startoplossing.txt", res);
+            res.startOplossingInladen("../../startoplossing.txt", res);
 
 
             /*
@@ -73,7 +73,7 @@ namespace Groot
                         T *= 0.99d;
                     }
                     lastDecrementFound++;
-                    SolutionData newData = new SolutionData(currentSolution, findChoice(2));
+                    SolutionData newData = new SolutionData(currentSolution, findChoice(6));
                     if (((newData.Value <= currentSolution.Value || acceptanceChance(currentSolution.Value, newData.Value, T) >= RNG.NextDouble()) && newData.allow))
                     {
                         if (!newData.accepted)

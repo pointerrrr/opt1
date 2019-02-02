@@ -353,6 +353,7 @@ namespace Groot
             Rijtijd += truck.Rijtijden[dag] - oudRijtijd;
 
             truck.AddOrder(order, index, dag, route, newCap);
+            OrderTrucks[order].Add(new OrderTruck(truck == Truck1 ? 0 : 1, dag, route));
         }
 
         void AddSpecificDumpen(int dumptruck, int dumpdag, int dumproute, int dumpindex)
