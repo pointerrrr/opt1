@@ -31,8 +31,16 @@ namespace Groot
                 res.ValidCheck[Orders[i].Key] = new ValidArray(f: Orders[i].Value.Frequentie);
                 res.Strafpunten += Orders[i].Value.Frequentie * Orders[i].Value.LedigingDuurMinuten * PenaltyModifier;
             }
+
+            /*for(int i = 0; i < 200; i++)
+            {
+                SolutionData newData = new SolutionData(res, RNG.Next(1));
+                res.Mutation(newData);
+            }*/
+            /*SolutionData newData2 = new SolutionData(res, RNG.Next(2, 6));
+            res.Mutation(newData2);*/
             //res.startOplossingInladen("../../startoplossing.txt", res);
-        
+
 
             /*
             for(int j = 0; j < 2; j++)
@@ -55,10 +63,10 @@ namespace Groot
             //AddCloud(currentSolution);
 
             Solution bestSolution = currentSolution.Copy();
-            for (int asdf = 0; asdf < 10; asdf++)
+            for (int asdf = 0; asdf < 5; asdf++)
             {
                 T = startT;
-                for (int i = 0; i <  MaxIterations  || lastDecrementFound < 1000000; i++)
+                for (int i = 0; i < MaxIterations || lastDecrementFound < 1000000; i++)
                 {
                     if (i % Q == 0)
                     {
@@ -81,30 +89,17 @@ namespace Groot
                         }
                     }
                 }
-                /*
-                lastDecrementFound = 0;
-                T = startT;
-
-                for(int i = 0; i < MaxIterations && lastDecrementFound < 100000; i++)
+                currentSolution = bestSolution.Copy();
+                for (int i = 0; i < MaxIterations; i++)
                 {
-                    if (i % Q == 0)
+                    SolutionData newData2 = new SolutionData(currentSolution, RNG.Next(2, 6));
+                    if (newData2.allow && newData2.accepted)
                     {
-                        T *= 0.99d;
-                    }
-
-                    Solution randomNeighbor = currentSolution.Copy().RandomMutation(1);
-
-                    lastDecrementFound++;
-                    if (randomNeighbor.Value <= currentSolution.Value || acceptanceChance(currentSolution, randomNeighbor, T) >= RNG.NextDouble())
-                    {
-                        currentSolution = randomNeighbor.Copy();
+                        currentSolution.Mutation(newData2);
                         if (currentSolution.Value < bestSolution.Value)
-                        {
                             bestSolution = currentSolution.Copy();
-                            lastDecrementFound = 0;
-                        }
                     }
-                }*/
+                }
             }
             return bestSolution;
         }

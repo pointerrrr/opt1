@@ -9,11 +9,11 @@ namespace Groot
 {
     public class OrderTruck
     {
-        public int Truck, Dag;
+        public int Truck, Dag, Route;
 
-        public OrderTruck(int truck, int dag)
+        public OrderTruck(int truck, int dag, int route)
         {
-            Truck = truck; Dag = dag;
+            Truck = truck; Dag = dag; Route = route;
         }
     }
 
@@ -32,6 +32,10 @@ namespace Groot
             Truck1 = new Truck();
             Truck2 = new Truck();
             Rijtijd = 600;
+            StrafIntern = RijtijdStraf + MinRijtijdDag * RijtijdStrafMinuut;
+            OrderTrucks = new Dictionary<int, List<OrderTruck>>();
+            foreach (KeyValuePair<int, OrderDescription> kvp in Orders)
+                OrderTrucks[kvp.Key] = new List<OrderTruck>();
         }
 
         public Solution Copy()
@@ -43,12 +47,13 @@ namespace Groot
             KeyValuePair<int, ValidArray>[] validcopy = ValidCheck.ToArray();
             foreach (KeyValuePair<int, ValidArray> kvp in validcopy)
                 res.ValidCheck[kvp.Key] = kvp.Value.Copy();
+            res.OrderTrucks = new Dictionary<int, List<OrderTruck>>();
             KeyValuePair<int, List<OrderTruck>>[] ordertruckcopy = OrderTrucks.ToArray();
             foreach (KeyValuePair<int, List<OrderTruck>> kvp in ordertruckcopy)
             {
                 res.OrderTrucks[kvp.Key] = new List<OrderTruck>();
                 foreach (OrderTruck ot in kvp.Value)
-                    res.OrderTrucks[kvp.Key].Add(new OrderTruck(ot.Truck, ot.Dag));
+                    res.OrderTrucks[kvp.Key].Add(new OrderTruck(ot.Truck, ot.Dag, ot.Route));
             }
 
             res.Rijtijd = Rijtijd;
@@ -105,10 +110,56 @@ namespace Groot
 
         public void AddRandomOrder(Truck truck, SolutionData data)
         {
-            truck.AddOrder(data.order1, data.index1, data.dag1, data.route1, data.Capaciteit1.Value);
+            switch(data.frequentie)
+            {
+                case 1:
+                    truck.AddOrder(data.order1, data.index1, data.dag1, data.route1, data.Capaciteit1.Value);
+                    ValidCheck[data.order1][data.dag1]++;
+                    OrderTrucks[data.order1].Add(new OrderTruck(data.truck, data.dag1, data.route1));
+                    break;
+                case 2:
+                    truck.AddOrder(data.order1, data.index1, data.dag1, data.route1, data.Capaciteit1.Value);
+                    ValidCheck[data.order1][data.dag1]++;
+                    OrderTrucks[data.order1].Add(new OrderTruck(data.truck, data.dag1, data.route1));
+
+                    truck.AddOrder(data.order1, data.index2, data.dag2, data.route2, data.Capaciteit2.Value);
+                    ValidCheck[data.order1][data.dag2]++;
+                    OrderTrucks[data.order1].Add(new OrderTruck(data.truck, data.dag2, data.route2));
+                    break;
+                case 3:
+                    truck.AddOrder(data.order1, data.index1, data.dag1, data.route1, data.Capaciteit1.Value);
+                    ValidCheck[data.order1][data.dag1]++;
+                    OrderTrucks[data.order1].Add(new OrderTruck(data.truck, data.dag1, data.route1));
+
+                    truck.AddOrder(data.order1, data.index2, data.dag2, data.route2, data.Capaciteit2.Value);
+                    ValidCheck[data.order1][data.dag2]++;
+                    OrderTrucks[data.order1].Add(new OrderTruck(data.truck, data.dag2, data.route2));
+
+                    truck.AddOrder(data.order1, data.index3, data.dag3, data.route3, data.Capaciteit3.Value);
+                    ValidCheck[data.order1][data.dag3]++;
+                    OrderTrucks[data.order1].Add(new OrderTruck(data.truck, data.dag3, data.route3));
+                    break;
+                case 4:
+                    truck.AddOrder(data.order1, data.index1, data.dag1, data.route1, data.Capaciteit1.Value);
+                    ValidCheck[data.order1][data.dag1]++;
+                    OrderTrucks[data.order1].Add(new OrderTruck(data.truck, data.dag1, data.route1));
+
+                    truck.AddOrder(data.order1, data.index2, data.dag2, data.route2, data.Capaciteit2.Value);
+                    ValidCheck[data.order1][data.dag2]++;
+                    OrderTrucks[data.order1].Add(new OrderTruck(data.truck, data.dag2, data.route2));
+
+                    truck.AddOrder(data.order1, data.index3, data.dag3, data.route3, data.Capaciteit3.Value);
+                    ValidCheck[data.order1][data.dag3]++;
+                    OrderTrucks[data.order1].Add(new OrderTruck(data.truck, data.dag3, data.route3));
+
+                    truck.AddOrder(data.order1, data.index4, data.dag4, data.route4, data.Capaciteit4.Value);
+                    ValidCheck[data.order1][data.dag4]++;
+                    OrderTrucks[data.order1].Add(new OrderTruck(data.truck, data.dag4, data.route4));
+                    break;
+            }
+          
 
             truck.Rijtijden = data.Truck1Rijtijden;
-            ValidCheck[data.order1][data.dag1]++;
             Strafpunten = data.SolutionStrafpunten;
             StrafIntern = data.SolutionStrafIntern;
             Rijtijd = data.SolutionRijtijd;
@@ -116,10 +167,54 @@ namespace Groot
 
         public void RemoveRandomOrder(Truck truck, SolutionData data)
         {
-            truck.RemoveOrder(data.index1, data.dag1, data.route1, data.Capaciteit1.Value);
+            switch(data.frequentie)
+            {
+                case 1:
+                    truck.RemoveOrder(data.index1, data.dag1, data.route1, data.Capaciteit1.Value);
+                    truck.Rijtijden = data.truck == 0 ? data.Truck1Rijtijden : data.Truck2Rijtijden;
+                    ValidCheck[data.order1][data.dag1]--;
+                    break;
+                case 2:
+                    this[data.truck1].RemoveOrder(data.index1, data.dag1, data.route1, data.Capaciteit1.Value);
+                    this[data.truck1].Rijtijden = data.truck1 == 0 ? data.Truck1Rijtijden : data.Truck2Rijtijden;
+                    ValidCheck[data.order1][data.dag1]--;
 
-            truck.Rijtijden = data.Truck1Rijtijden;
-            ValidCheck[data.order1][data.dag1]--;
+                    this[data.truck2].RemoveOrder(data.index2, data.dag2, data.route2, data.Capaciteit2.Value);
+                    this[data.truck2].Rijtijden = data.truck2 == 0 ? data.Truck1Rijtijden : data.Truck2Rijtijden;
+                    ValidCheck[data.order1][data.dag2]--;
+                    break;
+                case 3:
+                    this[data.truck1].RemoveOrder(data.index1, data.dag1, data.route1, data.Capaciteit1.Value);
+                    this[data.truck1].Rijtijden = data.truck1 == 0 ? data.Truck1Rijtijden : data.Truck2Rijtijden;
+                    ValidCheck[data.order1][data.dag1]--;
+
+                    this[data.truck2].RemoveOrder(data.index2, data.dag2, data.route2, data.Capaciteit2.Value);
+                    this[data.truck2].Rijtijden = data.truck2 == 0 ? data.Truck1Rijtijden : data.Truck2Rijtijden;
+                    ValidCheck[data.order1][data.dag2]--;
+
+                    this[data.truck3].RemoveOrder(data.index3, data.dag3, data.route3, data.Capaciteit3.Value);
+                    this[data.truck3].Rijtijden = data.truck3 == 0 ? data.Truck1Rijtijden : data.Truck2Rijtijden;
+                    ValidCheck[data.order1][data.dag3]--;
+                    break;
+                case 4:
+                    this[data.truck1].RemoveOrder(data.index1, data.dag1, data.route1, data.Capaciteit1.Value);
+                    this[data.truck1].Rijtijden = data.truck1 == 0 ? data.Truck1Rijtijden : data.Truck2Rijtijden;
+                    ValidCheck[data.order1][data.dag1]--;
+
+                    this[data.truck2].RemoveOrder(data.index2, data.dag2, data.route2, data.Capaciteit2.Value);
+                    this[data.truck2].Rijtijden = data.truck2 == 0 ? data.Truck1Rijtijden : data.Truck2Rijtijden;
+                    ValidCheck[data.order1][data.dag2]--;
+
+                    this[data.truck3].RemoveOrder(data.index3, data.dag3, data.route3, data.Capaciteit3.Value);
+                    this[data.truck3].Rijtijden = data.truck3 == 0 ? data.Truck1Rijtijden : data.Truck2Rijtijden;
+                    ValidCheck[data.order1][data.dag3]--;
+
+                    this[data.truck4].RemoveOrder(data.index4, data.dag4, data.route4, data.Capaciteit4.Value);
+                    this[data.truck4].Rijtijden = data.truck4 == 0 ? data.Truck1Rijtijden : data.Truck2Rijtijden;
+                    ValidCheck[data.order1][data.dag4]--;
+                    break;
+            }
+            OrderTrucks[data.order1] = new List<OrderTruck>();
             Strafpunten = data.SolutionStrafpunten;
             StrafIntern = data.SolutionStrafIntern;
             Rijtijd = data.SolutionRijtijd;
@@ -146,6 +241,9 @@ namespace Groot
             truck.Rijtijden = data.Truck1Rijtijden;
             StrafIntern = data.SolutionStrafIntern;
             Rijtijd = data.SolutionRijtijd;
+
+            int orderIndex = OrderTrucks[data.order1].FindIndex((o) => o.Truck == data.truck && o.Dag == data.dag1 && o.Route == data.route1);
+            OrderTrucks[data.order1][orderIndex].Route = data.route2;
         }
 
         public void AddDumpen(Truck truck, SolutionData data)
@@ -177,14 +275,18 @@ namespace Groot
             Rijtijd = data.SolutionRijtijd;
             ValidCheck[data.order1][data.dag1]--;
             ValidCheck[data.order1][data.dag2]++;
+
+            int orderIndex = OrderTrucks[data.order1].FindIndex((o) => o.Truck == data.truck && o.Dag == data.dag1 && o.Route == data.route1);
+            OrderTrucks[data.order1][orderIndex].Dag = data.dag2;
+            OrderTrucks[data.order1][orderIndex].Route = data.route2;
         }
 
         public void ShiftRandomOrderBetweenTrucks(SolutionData data)
         {
-            int swapTo = data.truck;
-            int swapFrom = swapTo == 0 ? 1 : 0;
-            Truck Truck1 = this[swapTo];
-            Truck Truck2 = this[swapFrom];
+            int swapFrom = data.truck;
+            int swapTo = swapFrom == 0 ? 1 : 0;
+            Truck Truck1 = this[swapFrom];
+            Truck Truck2 = this[swapTo];
 
             Truck1.RemoveOrder(data.index1, data.dag1, data.route1, data.Capaciteit1.Value);
             Truck2.AddOrder(data.order1, data.index2, data.dag2, data.route2, data.Capaciteit2.Value);
@@ -196,6 +298,11 @@ namespace Groot
             Rijtijd = data.SolutionRijtijd;
             ValidCheck[data.order1][data.dag1]--;
             ValidCheck[data.order1][data.dag2]++;
+
+            int orderIndex = OrderTrucks[data.order1].FindIndex((o) => o.Truck == data.truck && o.Dag == data.dag1 && o.Route == data.route1);
+            OrderTrucks[data.order1][orderIndex].Truck = swapTo;
+            OrderTrucks[data.order1][orderIndex].Dag = data.dag2;
+            OrderTrucks[data.order1][orderIndex].Route = data.route2;
         }
 
         public void TwoOpt(Truck truck, SolutionData data)
@@ -317,12 +424,19 @@ namespace Groot
         }
         void UpdateRijtijdStraf(double oud, double nieuw)
         {
-            if (oud <= MaxRijtijdDag && nieuw > MaxRijtijdDag)
+            /*if (oud <= MaxRijtijdDag && nieuw > MaxRijtijdDag)
                 StrafIntern += (nieuw - MaxRijtijdDag) * RijtijdStrafMinuut + RijtijdStraf;
             else if (oud > MaxRijtijdDag && nieuw <= MaxRijtijdDag)
                 StrafIntern -= (oud - MaxRijtijdDag) * RijtijdStrafMinuut + RijtijdStraf;
             else if (oud > MaxRijtijdDag && nieuw > MaxRijtijdDag)
-                StrafIntern += (nieuw - oud) * RijtijdStrafMinuut;
+                StrafIntern += (nieuw - oud) * RijtijdStrafMinuut;*/
+
+            if (oud >= MinRijtijdDag && nieuw < MinRijtijdDag)
+                StrafIntern += (MinRijtijdDag - nieuw) * RijtijdStrafMinuut + RijtijdStraf;
+            else if (oud < MinRijtijdDag && nieuw >= MinRijtijdDag)
+                StrafIntern -= (MinRijtijdDag - oud) * RijtijdStrafMinuut + RijtijdStraf;
+            else if (oud < MinRijtijdDag && nieuw < MinRijtijdDag)
+                StrafIntern += (oud - nieuw) * RijtijdStrafMinuut;
         }
 
         public void startOplossingInladen(string path, Solution s)
