@@ -14,7 +14,7 @@ namespace Groot
         public Capaciteit Capaciteit1, Capaciteit2;
         public Dictionary<int, ValidArray> SolValidCheck;
         public double SolutionRijtijd, SolutionStrafpunten, SolutionStrafIntern;
-        public int Choice, truck, dag1, dag2, route1, route2, index1, index2, order1, order2, frequentie;
+        public int Choice, truck, dag1, dag2, dag3, dag4, route1, route2, route3, route4, index1, index2, index3, index4, order1, order2, frequentie, dagselectie;
         public bool accepted = true, allow = true;
 
         public double Value
@@ -188,15 +188,30 @@ namespace Groot
 
             switch (frequentie)
             {
+                case 1:
+                    route1 = RNG.Next(t.Dagen[dag1].Count);
 
+                    index1 = RNG.Next(t.Dagen[dag1][route1].Item1.Count);
+
+                    Capaciteit1 = new Capaciteit(t.Dagen[dag1][route1].Item2.Value);
+                    AddSpecificOrder(t, dag1, order1, route1, index1, Capaciteit1, Truck1Rijtijden);
+                    break;
+                case 2:
+                    dagselectie = RNG.Next(2);
+                    break;
+                case 3:
+                    dag1 = 0; dag2 = 2; dag3 = 4;
+                    break;
+                case 4:
+                    dagselectie = RNG.Next(5);
+                    if(dagselectie != 4)
+                    {
+
+                    }
+                    break;
             }
 
-            route1 = RNG.Next(t.Dagen[dag1].Count);
-
-            index1 = RNG.Next(t.Dagen[dag1][route1].Item1.Count);
-
-            Capaciteit1 = new Capaciteit(t.Dagen[dag1][route1].Item2.Value);
-            AddSpecificOrder(t, dag1, order1, route1, index1, Capaciteit1, Truck1Rijtijden);
+            
         }
 
         void RemoveRandomOrder()

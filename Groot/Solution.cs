@@ -7,10 +7,21 @@ using static Groot.Data;
 
 namespace Groot
 {
+    public class OrderTruck
+    {
+        public int Truck, Dag;
+
+        public OrderTruck(int truck, int dag)
+        {
+            Truck = truck; Dag = dag;
+        }
+    }
+
     public class Solution
     {
         public Truck Truck1, Truck2;
         public Dictionary<int, ValidArray> ValidCheck;
+        public Dictionary<int, List<OrderTruck>> OrderTrucks;
         
         public double Value { get { return Rijtijd + Strafpunten + StrafIntern; } }
 
@@ -29,9 +40,17 @@ namespace Groot
             res.Truck1 = Truck1.Copy();
             res.Truck2 = Truck2.Copy();
             res.ValidCheck = new Dictionary<int, ValidArray>();
-            KeyValuePair<int, ValidArray>[] copy = ValidCheck.ToArray();
-            foreach (KeyValuePair<int, ValidArray> kvp in copy)
+            KeyValuePair<int, ValidArray>[] validcopy = ValidCheck.ToArray();
+            foreach (KeyValuePair<int, ValidArray> kvp in validcopy)
                 res.ValidCheck[kvp.Key] = kvp.Value.Copy();
+            KeyValuePair<int, List<OrderTruck>>[] ordertruckcopy = OrderTrucks.ToArray();
+            foreach (KeyValuePair<int, List<OrderTruck>> kvp in ordertruckcopy)
+            {
+                res.OrderTrucks[kvp.Key] = new List<OrderTruck>();
+                foreach (OrderTruck ot in kvp.Value)
+                    res.OrderTrucks[kvp.Key].Add(new OrderTruck(ot.Truck, ot.Dag));
+            }
+
             res.Rijtijd = Rijtijd;
             res.Strafpunten = Strafpunten;
             res.StrafIntern = StrafIntern;
