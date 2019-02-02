@@ -66,7 +66,7 @@ namespace Groot
             for (int asdf = 0; asdf < 10; asdf++)
             {
                 T = startT;
-                for (int i = 0; i < MaxIterations /*|| lastDecrementFound < 1000000*/; i++)
+                for (int i = 0; i < MaxIterations || lastDecrementFound < 10000000; i++)
                 {
                     if (i % Q == 0)
                     {
