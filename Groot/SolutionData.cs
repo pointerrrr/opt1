@@ -21,11 +21,12 @@ namespace Groot
         {
             get { return SolutionRijtijd + SolutionStrafpunten + SolutionStrafIntern; }
         }
-        public SolutionData(Solution sol, int choice)
+        public SolutionData(Solution sol, int choice, bool mutate = true)
         {
             oldSolution = sol;
             Choice = choice;
-            Calculate(Choice);
+            if (mutate)
+                Calculate(Choice);
         }
 
         void Calculate(int choice)
@@ -39,10 +40,10 @@ namespace Groot
                     RemoveRandomOrder();
                     break;
                 case 2:
-                    AddDumpen();
+                    ShiftRandomOrderBetweenRoutes();
                     break;
                 case 3:
-                    RemoveDumpen();
+                    ShiftRandomOrderWithinRoute();
                     break;
                 case 4:
                     ShiftRandomOrderBetweenDays();
@@ -51,10 +52,10 @@ namespace Groot
                     ShiftRandomOrderBetweenTrucks();
                     break;
                 case 6:
-                    ShiftRandomOrderWithinRoute();
+                    AddRandomDumpen();
                     break;
                 case 7:
-                    ShiftRandomOrderBetweenRoutes();
+                    RemoveDumpen();
                     break;
                 case 8:
                     TwoAndAHalfOpt();
@@ -227,19 +228,48 @@ namespace Groot
             RemoveSpecificOrder(t, dag1, route1, index1, Capaciteit1, Truck1Rijtijden);
         }
 
-        void AddDumpen()
-        {
-            Truck t;
-            truck = 0;
-            t = oldSolution[truck];
 
+        public void AddSpecificDumpen(int dumptruck, int dumpdag, int dumproute, int dumpindex)
+        {
+            truck = dumptruck;
+            Truck t = oldSolution[dumptruck];
+            dag1 = dumpdag;
+            route1 = dumproute;
+            index1 = dumpindex;
             SolutionRijtijd = oldSolution.Rijtijd;
             t.Rijtijden.CopyTo(Truck1Rijtijden, 0);
+            double oudRijtijd = Truck1Rijtijden[dumpdag];
+
+            int a = 287;
+
+            if (dumpindex != 0)
+                a = OrdersDict[t.Dagen[dumpdag][dumproute].Item1[dumpindex - 1]].MatrixID;
+
+            Truck1Rijtijden[dumpdag] -= AfstandenMatrix[a, OrdersDict[t.Dagen[dumpdag][dumproute].Item1[dumpindex]].MatrixID].Rijtijd;
+            Truck1Rijtijden[dumpdag] += AfstandenMatrix[287, OrdersDict[t.Dagen[dumpdag][dumproute].Item1[dumpindex]].MatrixID].Rijtijd;
+            Truck1Rijtijden[dumpdag] += AfstandenMatrix[a, 287].Rijtijd;
+            Truck1Rijtijden[dumpdag] += 30;
+            UpdateRijtijdStraf(oudRijtijd, Truck1Rijtijden[dumpdag]);
+
+            double c1Voor = t.Dagen[dumpdag][dumproute].Item2.Value;
+            double c2Voor = 0;
+
+            Capaciteit1 = CalculateCapaciteit(t.Dagen[dumpdag][dumproute].Item1, 0, dumpindex - 1);
+            Capaciteit2 = CalculateCapaciteit(t.Dagen[dumpdag][dumproute].Item1, dumpindex, t.Dagen[dumpdag][dumproute].Item1.Count);
+            UpdateCapaciteit(c1Voor, Capaciteit1.Value);
+            UpdateCapaciteit(c2Voor, Capaciteit2.Value);
+
+            SolutionRijtijd += Truck1Rijtijden[dumpdag] - oudRijtijd;
+        }
+
+        void AddRandomDumpen()
+        {
+            Truck t;
+            truck = RNG.Next(2);
+            t = oldSolution[truck];
 
             dag1 = RNG.Next(5);
             route1 = RNG.Next(t.Dagen[dag1].Count);
-
-            double oudRijtijd = Truck1Rijtijden[dag1];
 
             if (t.Dagen[dag1][route1].Item1.Count < 3)
             {
@@ -249,26 +279,7 @@ namespace Groot
 
             index1 = RNG.Next(t.Dagen[dag1][route1].Item1.Count - 1);
 
-            int a = 287;
-
-            if (index1 != 0)
-                a = OrdersDict[t.Dagen[dag1][route1].Item1[index1 - 1]].MatrixID;
-
-            Truck1Rijtijden[dag1] -= AfstandenMatrix[a , OrdersDict[t.Dagen[dag1][route1].Item1[index1]].MatrixID].Rijtijd;
-            Truck1Rijtijden[dag1] += AfstandenMatrix[287, OrdersDict[t.Dagen[dag1][route1].Item1[index1]].MatrixID].Rijtijd;
-            Truck1Rijtijden[dag1] += AfstandenMatrix[a, 287].Rijtijd;
-            Truck1Rijtijden[dag1] += 30;
-            UpdateRijtijdStraf(oudRijtijd, Truck1Rijtijden[dag1]);
-
-            double c1Voor = t.Dagen[dag1][route1].Item2.Value;
-            double c2Voor = 0;
-
-            Capaciteit1 = CalculateCapaciteit(t.Dagen[dag1][route1].Item1, 0, index1 - 1);
-            Capaciteit2 = CalculateCapaciteit(t.Dagen[dag1][route1].Item1, index1, t.Dagen[dag1][route1].Item1.Count);
-            UpdateCapaciteit(c1Voor, Capaciteit1.Value);
-            UpdateCapaciteit(c2Voor, Capaciteit2.Value);
-
-            SolutionRijtijd += Truck1Rijtijden[dag1] - oudRijtijd;
+            AddSpecificDumpen(truck, dag1, route1, index1);
         }
 
         void RemoveDumpen()
@@ -518,12 +529,12 @@ namespace Groot
         {
             if (validVoor)
             {
-                SolutionStrafpunten += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
+                SolutionStrafpunten += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * PenaltyModifier;
                 //StrafIntern += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
             }
             else if (validNa)
             {
-                SolutionStrafpunten -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
+                SolutionStrafpunten -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * PenaltyModifier;
                 //StrafIntern -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
             }
         }

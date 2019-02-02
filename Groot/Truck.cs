@@ -19,8 +19,9 @@ namespace Groot
             Rijtijden = new double[5];
             for(int i = 0; i < 5; i++)
             {
-                Rijtijden[i] = 30;
+                Rijtijden[i] = 60;
                 Dagen[i] = new List<Tuple<List<int>, Capaciteit>>();
+                Dagen[i].Add(new Tuple<List<int>, Capaciteit>(new List<int>(), new Capaciteit(0)));
                 Dagen[i].Add(new Tuple<List<int>, Capaciteit>(new List<int>(), new Capaciteit(0)));
             }
         }
@@ -32,10 +33,10 @@ namespace Groot
             {
                 for (int j = 0; j < Dagen[i].Count; j++)
                 {
-                    if (j != 0)
+                    if (j > 1)
                         res.Dagen[i].Add(new Tuple<List<int>, Capaciteit>(new List<int>(), new Capaciteit(Dagen[i][j].Item2.Value)));
                     else
-                        res.Dagen[i][0].Item2.SetValue(Dagen[i][0].Item2.Value);
+                        res.Dagen[i][j].Item2.SetValue(Dagen[i][j].Item2.Value);
                     for (int k = 0; k < Dagen[i][j].Item1.Count; k++)
                         res.Dagen[i][j].Item1.Add(Dagen[i][j].Item1[k]);
                 }
