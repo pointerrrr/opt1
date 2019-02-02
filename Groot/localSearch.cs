@@ -109,7 +109,7 @@ namespace Groot
 
         void InitChoiceChances()
         {
-            choices = new int[] { 150, 20, 25, 25, 25, 25, 1, 1, 0, 0 };
+            choices = new int[] { 200, 10, 50, 50, 50, 50, 1, 1, 0, 0 };
             sumRight = new int[choices.Length];
 
             sumRight[0] = choices[0];
