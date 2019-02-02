@@ -218,7 +218,9 @@ namespace Groot
                     route2 = RNG.Next(t.Dagen[dag2].Count);
                     index2 = RNG.Next(t.Dagen[dag2][route2].Item1.Count);
                     Capaciteit2 = new Capaciteit(t.Dagen[dag2][route2].Item2.Value);
+                    SolValidCheck[order1][dag1]++;
                     AddSpecificOrder(t, dag2, order1, route2, index2, Capaciteit2, Truck1Rijtijden);
+                    SolValidCheck[order1][dag1]--;
                     break;
                 case 3:
                     dag1 = 0; dag2 = 2; dag3 = 4;
@@ -231,12 +233,16 @@ namespace Groot
                     route2 = RNG.Next(t.Dagen[dag2].Count);
                     index2 = RNG.Next(t.Dagen[dag2][route2].Item1.Count);
                     Capaciteit2 = new Capaciteit(t.Dagen[dag2][route2].Item2.Value);
+                    SolValidCheck[order1][dag1]++;
                     AddSpecificOrder(t, dag2, order1, route2, index2, Capaciteit2, Truck1Rijtijden);
 
                     route3 = RNG.Next(t.Dagen[dag3].Count);
                     index3 = RNG.Next(t.Dagen[dag3][route3].Item1.Count);
                     Capaciteit3 = new Capaciteit(t.Dagen[dag3][route3].Item2.Value);
+                    SolValidCheck[order1][dag2]++;
                     AddSpecificOrder(t, dag3, order1, route3, index3, Capaciteit3, Truck1Rijtijden);
+                    SolValidCheck[order1][dag1]--;
+                    SolValidCheck[order1][dag2]--;
                     break;
                 case 4:
                     List<int> selectie = new List<int>(){ 0, 1, 2, 3, 4 };
@@ -251,17 +257,23 @@ namespace Groot
                     route2 = RNG.Next(t.Dagen[dag2].Count);
                     index2 = RNG.Next(t.Dagen[dag2][route2].Item1.Count);
                     Capaciteit2 = new Capaciteit(t.Dagen[dag2][route2].Item2.Value);
+                    SolValidCheck[order1][dag1]++;
                     AddSpecificOrder(t, dag2, order1, route2, index2, Capaciteit2, Truck1Rijtijden);
 
                     route3 = RNG.Next(t.Dagen[dag3].Count);
                     index3 = RNG.Next(t.Dagen[dag3][route3].Item1.Count);
                     Capaciteit3 = new Capaciteit(t.Dagen[dag3][route3].Item2.Value);
+                    SolValidCheck[order1][dag2]++;
                     AddSpecificOrder(t, dag3, order1, route3, index3, Capaciteit3, Truck1Rijtijden);
 
                     route4 = RNG.Next(t.Dagen[dag4].Count);
                     index4 = RNG.Next(t.Dagen[dag4][route4].Item1.Count);
                     Capaciteit4 = new Capaciteit(t.Dagen[dag4][route4].Item2.Value);
+                    SolValidCheck[order1][dag3]++;
                     AddSpecificOrder(t, dag4, order1, route4, index4, Capaciteit4, Truck1Rijtijden);
+                    SolValidCheck[order1][dag1]--;
+                    SolValidCheck[order1][dag2]--;
+                    SolValidCheck[order1][dag3]--;
                     break;
             }
             allow = true;
@@ -324,7 +336,9 @@ namespace Groot
                     route2 = oldSolution.OrderTrucks[order1][1].Route;
                     index2 = oldSolution[truck2].Dagen[dag2][route2].Item1.FindIndex((o) => o == order1);
                     Capaciteit2 = new Capaciteit(oldSolution[truck2].Dagen[dag2][route2].Item2.Value);
+                    SolValidCheck[order1][dag1]--;
                     RemoveSpecificOrder(oldSolution[truck2], dag2, route2, index2, Capaciteit2, alleRijtijden[truck2]);
+                    SolValidCheck[order1][dag1]++;
                     break;
                 case 3:
                     truck1 = oldSolution.OrderTrucks[order1][0].Truck;
@@ -339,6 +353,7 @@ namespace Groot
                     route2 = oldSolution.OrderTrucks[order1][1].Route;
                     index2 = oldSolution[truck2].Dagen[dag2][route2].Item1.FindIndex((o) => o == order1);
                     Capaciteit2 = new Capaciteit(oldSolution[truck2].Dagen[dag2][route2].Item2.Value);
+                    SolValidCheck[order1][dag1]--;
                     RemoveSpecificOrder(oldSolution[truck2], dag2, route2, index2, Capaciteit2, alleRijtijden[truck2]);
 
                     truck3 = oldSolution.OrderTrucks[order1][2].Truck;
@@ -346,7 +361,10 @@ namespace Groot
                     route3 = oldSolution.OrderTrucks[order1][2].Route;
                     index3 = oldSolution[truck3].Dagen[dag3][route3].Item1.FindIndex((o) => o == order1);
                     Capaciteit3 = new Capaciteit(oldSolution[truck3].Dagen[dag3][route3].Item2.Value);
+                    SolValidCheck[order1][dag2]--;
                     RemoveSpecificOrder(oldSolution[truck3], dag3, route3, index3, Capaciteit3, alleRijtijden[truck3]);
+                    SolValidCheck[order1][dag1]++;
+                    SolValidCheck[order1][dag2]++;
                     break;
                 case 4:
                     truck1 = oldSolution.OrderTrucks[order1][0].Truck;
@@ -361,6 +379,7 @@ namespace Groot
                     route2 = oldSolution.OrderTrucks[order1][1].Route;
                     index2 = oldSolution[truck2].Dagen[dag2][route2].Item1.FindIndex((o) => o == order1);
                     Capaciteit2 = new Capaciteit(oldSolution[truck2].Dagen[dag2][route2].Item2.Value);
+                    SolValidCheck[order1][dag1]--;
                     RemoveSpecificOrder(oldSolution[truck2], dag2, route2, index2, Capaciteit2, alleRijtijden[truck2]);
 
                     truck3 = oldSolution.OrderTrucks[order1][2].Truck;
@@ -368,6 +387,7 @@ namespace Groot
                     route3 = oldSolution.OrderTrucks[order1][2].Route;
                     index3 = oldSolution[truck3].Dagen[dag3][route3].Item1.FindIndex((o) => o == order1);
                     Capaciteit3 = new Capaciteit(oldSolution[truck3].Dagen[dag3][route3].Item2.Value);
+                    SolValidCheck[order1][dag2]--;
                     RemoveSpecificOrder(oldSolution[truck3], dag3, route3, index3, Capaciteit3, alleRijtijden[truck3]);
 
                     truck4 = oldSolution.OrderTrucks[order1][3].Truck;
@@ -375,7 +395,11 @@ namespace Groot
                     route4 = oldSolution.OrderTrucks[order1][3].Route;
                     index4 = oldSolution[truck4].Dagen[dag4][route4].Item1.FindIndex((o) => o == order1);
                     Capaciteit4 = new Capaciteit(oldSolution[truck4].Dagen[dag4][route4].Item2.Value);
+                    SolValidCheck[order1][dag3]--;
                     RemoveSpecificOrder(oldSolution[truck4], dag4, route4, index4, Capaciteit4, alleRijtijden[truck4]);
+                    SolValidCheck[order1][dag1]++;
+                    SolValidCheck[order1][dag2]++;
+                    SolValidCheck[order1][dag3]++;
                     break;
             }
             allow = true;
@@ -410,7 +434,6 @@ namespace Groot
             Capaciteit2 = CalculateCapaciteit(t.Dagen[dumpdag][dumproute].Item1, dumpindex, t.Dagen[dumpdag][dumproute].Item1.Count);
             UpdateCapaciteit(c1Voor, Capaciteit1.Value);
             UpdateCapaciteit(c2Voor, Capaciteit2.Value);
-            UpdateRijtijdStraf(oudRijtijd, Truck1Rijtijden[dumpdag]);
             SolutionRijtijd += Truck1Rijtijden[dumpdag] - oudRijtijd;
         }
 
@@ -538,7 +561,7 @@ namespace Groot
             AddSpecificOrder(t, dag2, order1, route2, index2, Capaciteit2, Truck1Rijtijden);
             SolValidCheck[order1][dag1]++;
             UpdateRijtijdStraf(oudRijtijd1, Truck1Rijtijden[dag1]);
-            UpdateRijtijdStraf(oudRijtijd1, Truck1Rijtijden[dag2]);
+            UpdateRijtijdStraf(oudRijtijd2, Truck1Rijtijden[dag2]);
         }
 
         void ShiftRandomOrderBetweenTrucks()
