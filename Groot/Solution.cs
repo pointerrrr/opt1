@@ -32,7 +32,7 @@ namespace Groot
             Truck1 = new Truck();
             Truck2 = new Truck();
             Rijtijd = 600;
-            StrafIntern = RijtijdStraf + MinRijtijdDag * RijtijdStrafMinuut;
+            //StrafIntern = RijtijdStraf + MinRijtijdDag * RijtijdStrafMinuut;
             OrderTrucks = new Dictionary<int, List<OrderTruck>>();
             foreach (KeyValuePair<int, OrderDescription> kvp in Orders)
                 OrderTrucks[kvp.Key] = new List<OrderTruck>();

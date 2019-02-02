@@ -63,10 +63,10 @@ namespace Groot
             //AddCloud(currentSolution);
 
             Solution bestSolution = currentSolution.Copy();
-            for (int asdf = 0; asdf < 5; asdf++)
+            for (int asdf = 0; asdf < 10; asdf++)
             {
                 T = startT;
-                for (int i = 0; i < MaxIterations || lastDecrementFound < 1000000; i++)
+                for (int i = 0; i < MaxIterations /*|| lastDecrementFound < 1000000*/; i++)
                 {
                     if (i % Q == 0)
                     {
@@ -109,7 +109,7 @@ namespace Groot
 
         void InitChoiceChances()
         {
-            choices = new int[] { 78, 20, 25, 25, 25, 25, 1, 1, 0, 0 };
+            choices = new int[] { 150, 20, 25, 25, 25, 25, 1, 1, 0, 0 };
             sumRight = new int[choices.Length];
 
             sumRight[0] = choices[0];

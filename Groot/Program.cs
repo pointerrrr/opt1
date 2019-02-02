@@ -12,7 +12,7 @@ namespace Groot
     {
         public static void Main(string[] args)
         {
-            int MaxIterations = 1000000, Q = 10000;
+            int MaxIterations = 10000000, Q = 10000;
             double T = 30d;
             try
             {
