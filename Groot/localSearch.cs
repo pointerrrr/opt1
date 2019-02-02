@@ -73,7 +73,7 @@ namespace Groot
                         T *= 0.99d;
                     }
                     lastDecrementFound++;
-                    SolutionData newData = new SolutionData(currentSolution, findChoice(6));
+                    SolutionData newData = new SolutionData(currentSolution, findChoice(2));
                     if (((newData.Value <= currentSolution.Value || acceptanceChance(currentSolution.Value, newData.Value, T) >= RNG.NextDouble()) && newData.allow))
                     {
                         if (!newData.accepted)
