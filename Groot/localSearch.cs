@@ -18,6 +18,7 @@ namespace Groot
         public LocalSearch(int MaxIterations, double T, int Q)
         {
             this.MaxIterations = MaxIterations; this.T = T; this.Q = Q; startT = T;
+            InitChoiceChances();
         }
 
         Solution GetStartSolution()
@@ -30,8 +31,8 @@ namespace Groot
                 res.ValidCheck[Orders[i].Key] = new ValidArray(f: Orders[i].Value.Frequentie);
                 res.Strafpunten += Orders[i].Value.Frequentie * Orders[i].Value.LedigingDuurMinuten * PenaltyModifier;
             }
-            res.startOplossingInladen("../../startoplossing.txt", res);
-
+            //res.startOplossingInladen("../../startoplossing.txt", res);
+        
 
             /*
             for(int j = 0; j < 2; j++)
@@ -64,7 +65,7 @@ namespace Groot
                         T *= 0.99d;
                     }
                     lastDecrementFound++;
-                    SolutionData newData = new SolutionData(currentSolution, RNG.Next(6));
+                    SolutionData newData = new SolutionData(currentSolution, findChoice(6));
                     if (((newData.Value <= currentSolution.Value || acceptanceChance(currentSolution.Value, newData.Value, T) >= RNG.NextDouble()) && newData.allow))
                     {
                         if (!newData.accepted)
@@ -106,6 +107,43 @@ namespace Groot
                 }*/
             }
             return bestSolution;
+        }
+
+        int[] choices;
+        int[] sumRight;
+
+        void InitChoiceChances()
+        {
+            choices = new int[] { 78, 20, 25, 25, 25, 25, 1, 1, 0, 0 };
+            sumRight = new int[choices.Length];
+
+            sumRight[0] = choices[0];
+
+            for (int i = 1; i < choices.Length; i++)
+                sumRight[i] = choices[i] + sumRight[i - 1];
+        }
+
+
+        int findChoice(int limit)
+        {
+            int max = 0;
+
+            for (int i = 0; i < sumRight.Length; i++)
+                max+= choices[i];
+
+            int choice = RNG.Next(max);
+
+            int res = 0;
+
+            for(int i = 0; i < limit; i++)
+                if(choice < sumRight[i])
+                {
+                    res = i;
+                    break;
+                }
+
+
+            return res;
         }
 
         double[] reses = new double[1000];

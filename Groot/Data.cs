@@ -20,7 +20,7 @@ namespace Groot
         public readonly static double MaxCapaciteit = 100000d;
         public readonly static double CapaciteitStraf = 0;//10000d;
         public readonly static double CapaciteitStrafLiter = 0;//10d;
-        public readonly static double PenaltyModifier = 3d;
+        public readonly static double PenaltyModifier = 10d;
 
         static Data()
         {

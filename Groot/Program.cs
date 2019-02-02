@@ -12,8 +12,8 @@ namespace Groot
     {
         public static void Main(string[] args)
         {
-            int MaxIterations = 10000000, Q = 10000;
-            double T = 100d;
+            int MaxIterations = 1000000, Q = 10000;
+            double T = 30d;
             try
             {
                 MaxIterations = int.Parse(args[0]);

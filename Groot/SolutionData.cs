@@ -14,7 +14,7 @@ namespace Groot
         public Capaciteit Capaciteit1, Capaciteit2;
         public Dictionary<int, ValidArray> SolValidCheck;
         public double SolutionRijtijd, SolutionStrafpunten, SolutionStrafIntern;
-        public int Choice, truck, dag1, dag2, route1, route2, index1, index2, order1, order2;
+        public int Choice, truck, dag1, dag2, route1, route2, index1, index2, order1, order2, frequentie;
         public bool accepted = true, allow = true;
 
         public double Value
@@ -180,7 +180,16 @@ namespace Groot
 
             dag1 = RNG.Next(5);
 
-            order1 = Orders[RNG.Next(Orders.Length)].Key;
+            int orderKey = RNG.Next(Orders.Length);
+
+            order1 = Orders[orderKey].Key;
+
+            frequentie = Orders[orderKey].Value.Frequentie;
+
+            switch (frequentie)
+            {
+
+            }
 
             route1 = RNG.Next(t.Dagen[dag1].Count);
 
