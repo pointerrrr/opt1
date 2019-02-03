@@ -66,6 +66,7 @@ namespace Groot
             for (int reiterations = 0; reiterations < 10; reiterations++)
             {
                 T = startT;
+                lastDecrementFound = 0;
                 for (int i = 0; i < MaxIterations || lastDecrementFound < 10000000; i++)
                 {
                     if (i % Q == 0)
