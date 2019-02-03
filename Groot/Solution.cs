@@ -32,7 +32,6 @@ namespace Groot
             Truck1 = new Truck();
             Truck2 = new Truck();
             Rijtijd = 600;
-            //StrafIntern = RijtijdStraf + MinRijtijdDag * RijtijdStrafMinuut;
             OrderTrucks = new Dictionary<int, List<OrderTruck>>();
             foreach (KeyValuePair<int, OrderDescription> kvp in Orders)
                 OrderTrucks[kvp.Key] = new List<OrderTruck>();
@@ -69,8 +68,7 @@ namespace Groot
             if(choice != 5)
             {
                 truck = this[data.truck];
-            }
-                
+            }                
 
             switch (choice)
             {
@@ -92,25 +90,13 @@ namespace Groot
                 case 5:
                     ShiftRandomOrderBetweenTrucks(data);
                     break;
-                case 6:
-                    AddDumpen(truck, data);
-                    break;
-                case 7:
-                    RemoveDumpen(truck, data);
-                    break;
-                case 8:
-                    TwoAndAHalfOpt(truck, data);
-                    break;
-                case 9:
-                    TwoOpt(truck, data);
-                    break;
-
             }
         }
 
+
         public void AddRandomOrder(Truck truck, SolutionData data)
         {
-            switch(data.frequentie)
+            switch (data.frequentie)
             {
                 case 1:
                     truck.AddOrder(data.order1, data.index1, data.dag1, data.route1, data.Capaciteit1.Value);
@@ -157,7 +143,7 @@ namespace Groot
                     OrderTrucks[data.order1].Add(new OrderTruck(data.truck, data.dag4, data.route4));
                     break;
             }
-          
+
 
             truck.Rijtijden = data.Truck1Rijtijden;
             Strafpunten = data.SolutionStrafpunten;
@@ -165,9 +151,10 @@ namespace Groot
             Rijtijd = data.SolutionRijtijd;
         }
 
+
         public void RemoveRandomOrder(Truck truck, SolutionData data)
         {
-            switch(data.frequentie)
+            switch (data.frequentie)
             {
                 case 1:
                     truck.RemoveOrder(data.index1, data.dag1, data.route1, data.Capaciteit1.Value);
@@ -245,25 +232,7 @@ namespace Groot
             int orderIndex = OrderTrucks[data.order1].FindIndex((o) => o.Truck == data.truck && o.Dag == data.dag1 && o.Route == data.route1);
             OrderTrucks[data.order1][orderIndex].Route = data.route2;
         }
-
-        public void AddDumpen(Truck truck, SolutionData data)
-        {
-            truck.AddDumpen(data.dag1, data.route1, data.index1, data.Capaciteit1.Value, data.Capaciteit2.Value);
-
-            truck.Rijtijden = data.Truck1Rijtijden;
-            StrafIntern = data.SolutionStrafIntern;
-            Rijtijd = data.SolutionRijtijd;
-        }
-
-        public void RemoveDumpen(Truck truck, SolutionData data)
-        {
-            truck.RemoveDumpen(data.dag1, data.route1, data.Capaciteit1.Value);
-
-            truck.Rijtijden = data.Truck1Rijtijden;
-            StrafIntern = data.SolutionStrafIntern;
-            Rijtijd = data.SolutionRijtijd;
-        }
-
+        
         public void ShiftRandomOrderBetweenDays(Truck truck, SolutionData data)
         {
             truck.RemoveOrder(data.index1, data.dag1, data.route1, data.Capaciteit1.Value);
@@ -305,22 +274,11 @@ namespace Groot
             OrderTrucks[data.order1][orderIndex].Route = data.route2;
         }
 
-        public void TwoOpt(Truck truck, SolutionData data)
-        {
-            // TODO
-        }
-
-        public void TwoAndAHalfOpt(Truck truck, SolutionData data)
-        {            
-            // TODO
-        }
-
         // Adds a specific order WITHOUT using precalculated SolutionData
         public void AddSpecificOrder(Truck truck, int dag, int route, int index, int order)
         {
             double capaciteitVoor = truck.Dagen[dag][route].Item2.Value;
             double newCap = capaciteitVoor + OrdersDict[order].VolumePerContainer * OrdersDict[order].AantContainers;
-            UpdateCapaciteit(capaciteitVoor, newCap);
 
             bool validVoor = ValidCheck[order].Valid;
             ValidCheck[order][dag]++;
@@ -349,7 +307,6 @@ namespace Groot
             truck.Rijtijden[dag] += AfstandenMatrix[a, b].Rijtijd;
             truck.Rijtijden[dag] += AfstandenMatrix[b, c].Rijtijd;
 
-            UpdateRijtijdStraf(oudRijtijd, truck.Rijtijden[dag]);
             Rijtijd += truck.Rijtijden[dag] - oudRijtijd;
 
             truck.AddOrder(order, index, dag, route, newCap);
@@ -373,15 +330,9 @@ namespace Groot
             t.Rijtijden[dumpdag] += AfstandenMatrix[287, OrdersDict[t.Dagen[dumpdag][dumproute].Item1[dumpindex]].MatrixID].Rijtijd;
             t.Rijtijden[dumpdag] += AfstandenMatrix[a, 287].Rijtijd;
             t.Rijtijden[dumpdag] += 30;
-            UpdateRijtijdStraf(oudRijtijd, t.Rijtijden[dumpdag]);
-
-            double c1Voor = t.Dagen[dumpdag][dumproute].Item2.Value;
-            double c2Voor = 0;
-
+            
             Capaciteit Capaciteit1 = CalculateCapaciteit(t.Dagen[dumpdag][dumproute].Item1, 0, dumpindex - 1);
             Capaciteit Capaciteit2 = CalculateCapaciteit(t.Dagen[dumpdag][dumproute].Item1, dumpindex, t.Dagen[dumpdag][dumproute].Item1.Count);
-            UpdateCapaciteit(c1Voor, Capaciteit1.Value);
-            UpdateCapaciteit(c2Voor, Capaciteit2.Value);
 
             Rijtijd += t.Rijtijden[dumpdag] - oudRijtijd;
         }
@@ -395,7 +346,6 @@ namespace Groot
                 result += OrdersDict[l[i]].AantContainers * OrdersDict[l[i]].VolumePerContainer;
                 i++;
             }
-
             return new Capaciteit(result);
         }
 
@@ -404,42 +354,14 @@ namespace Groot
             if (validVoor)
             {
                 Strafpunten += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
-                //StrafIntern += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
             }
             else if (validNa)
             {
                 Strafpunten -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
-                //StrafIntern -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
             }
         }
-
-        void UpdateCapaciteit(double capaciteitVoor, double capaciteitNa)
-        {
-            if (capaciteitVoor <= MaxCapaciteit && capaciteitNa > MaxCapaciteit)
-                StrafIntern += CapaciteitStrafLiter * (capaciteitNa - MaxCapaciteit) + CapaciteitStraf;
-            else if (capaciteitVoor > MaxCapaciteit && capaciteitNa <= MaxCapaciteit)
-                StrafIntern -= CapaciteitStrafLiter * (capaciteitVoor - MaxCapaciteit) + CapaciteitStraf;
-            else if (capaciteitVoor > MaxCapaciteit && capaciteitNa > MaxCapaciteit)
-                StrafIntern += CapaciteitStrafLiter * (capaciteitNa - capaciteitVoor);
-        }
-        void UpdateRijtijdStraf(double oud, double nieuw)
-        {
-            /*if (oud <= MaxRijtijdDag && nieuw > MaxRijtijdDag)
-                StrafIntern += (nieuw - MaxRijtijdDag) * RijtijdStrafMinuut + RijtijdStraf;
-            else if (oud > MaxRijtijdDag && nieuw <= MaxRijtijdDag)
-                StrafIntern -= (oud - MaxRijtijdDag) * RijtijdStrafMinuut + RijtijdStraf;
-            else if (oud > MaxRijtijdDag && nieuw > MaxRijtijdDag)
-                StrafIntern += (nieuw - oud) * RijtijdStrafMinuut;*/
-
-            if (oud >= MinRijtijdDag && nieuw < MinRijtijdDag)
-                StrafIntern += (MinRijtijdDag - nieuw) * RijtijdStrafMinuut + RijtijdStraf;
-            else if (oud < MinRijtijdDag && nieuw >= MinRijtijdDag)
-                StrafIntern -= (MinRijtijdDag - oud) * RijtijdStrafMinuut + RijtijdStraf;
-            else if (oud < MinRijtijdDag && nieuw < MinRijtijdDag)
-                StrafIntern += (oud - nieuw) * RijtijdStrafMinuut;
-        }
-
-        public void startOplossingInladen(string path, Solution s)
+        
+        public void StartOplossingInladen(string path, Solution s)
         {
             string[] visits = File.ReadAllLines(path);
             Truck t1 = s[0];
@@ -460,7 +382,7 @@ namespace Groot
                 orders.Add(order);
             }
 
-            Comparison<int[]> comp = (a, b) => { return compareOrder(a, b); };
+            Comparison<int[]> comp = (a, b) => { return CompareOrder(a, b); };
             orders.Sort(comp);
 
             int route = 0;
@@ -492,11 +414,10 @@ namespace Groot
                     route = 0;
                     offset = 0;                    
                 }
-
             }
         }
 
-        int compareOrder(int[] a, int[] b)
+        int CompareOrder(int[] a, int[] b)
         {
             if (a[0] != b[0])
                 return a[0] - b[0];

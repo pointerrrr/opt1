@@ -73,27 +73,6 @@ namespace Groot
             Dagen[dag][route].Item2.SetValue(newCap);
             Dagen[dag].RemoveAt(route + 1);
         }
-
-        public double getRijTijd(int dag)
-        {
-            double res = Rijtijden[dag];
-            //res += 30 * Dagen[dag].Count;
-
-            return res;
-        }
-
-        public double getCapaciteit(int dag, int route)
-        {
-            double result = 0;
-            int i = 0;
-            while (i < Dagen[dag][route].Item1.Count)
-            {
-                result += OrdersDict[Dagen[dag][route].Item1[i]].AantContainers * OrdersDict[Dagen[dag][route].Item1[i]].VolumePerContainer;
-                i++;
-            }
-
-            return result;
-        }
     }
 
     public class Capaciteit

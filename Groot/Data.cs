@@ -14,22 +14,17 @@ namespace Groot
         public static Random RNG = new Random();
 
         public readonly static double MaxRijtijdDag = 60d * 12d;
-        public readonly static double MinRijtijdDag = 60d * 8d;
-        public readonly static double RijtijdStraf = 0;//5000000d;
-        public readonly static double RijtijdStrafMinuut = 0;//100000d;
         public readonly static double MaxCapaciteit = 100000d;
-        public readonly static double CapaciteitStraf = 0;//10000d;
-        public readonly static double CapaciteitStrafLiter = 0;//10d;
         public readonly static double PenaltyModifier = 3d;
 
         static Data()
         {
-            AfstandenMatrix = afstandRijTijdInladen();
-            OrdersDict = ordersInladen();
+            AfstandenMatrix = AfstandRijTijdInladen();
+            OrdersDict = OrdersInladen();
             Orders = OrdersDict.ToArray();
         }
 
-        static AfstandRijtijd[,] afstandRijTijdInladen()
+        static AfstandRijtijd[,] AfstandRijTijdInladen()
         {
             AfstandRijtijd[,] res;
             string[] afstanden = File.ReadAllLines(@"..\..\afstanden.txt");
@@ -51,7 +46,7 @@ namespace Groot
             return res;
         }
 
-        static Dictionary<int, OrderDescription> ordersInladen()
+        static Dictionary<int, OrderDescription> OrdersInladen()
         {
             Dictionary<int, OrderDescription> res = new Dictionary<int, OrderDescription>();
 
