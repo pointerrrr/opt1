@@ -90,17 +90,6 @@ namespace Groot
                         }
                     }
                 }
-                /*currentSolution = bestSolution.Copy();
-                for (int i = 0; i < MaxIterations; i++)
-                {
-                    SolutionData newData2 = new SolutionData(currentSolution, RNG.Next(2, 6));
-                    if (newData2.allow && newData2.accepted)
-                    {
-                        currentSolution.Mutation(newData2);
-                        if (currentSolution.Value < bestSolution.Value)
-                            bestSolution = currentSolution.Copy();
-                    }
-                }*/
             }
             return bestSolution;
         }
@@ -110,7 +99,7 @@ namespace Groot
 
         void InitChoiceChances()
         {
-            choices = new int[] { 200, 10, 50, 50, 0, 50, 1, 1, 0, 0 };
+            choices = new int[] { 200, 10, 50, 50, 50, 50, 1, 1, 0, 0 };
             sumRight = new int[choices.Length];
 
             sumRight[0] = choices[0];
