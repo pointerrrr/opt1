@@ -45,7 +45,6 @@ namespace Groot
                 {
                     if(truck1.Dagen[i][j].Item1.Count < 1)
                     {
-                        n++;
                         continue;
                     }
                     for (int k = 0; k < truck1.Dagen[i][j].Item1.Count; k++)
@@ -62,7 +61,6 @@ namespace Groot
                 {
                     if (truck2.Dagen[i][j].Item1.Count < 1)
                     {
-                        n++;
                         continue;
                     }
                     for (int k = 0; k < truck2.Dagen[i][j].Item1.Count; k++)
