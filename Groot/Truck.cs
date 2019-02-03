@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 using static Groot.Data;
 
@@ -77,7 +75,6 @@ namespace Groot
         public double getRijTijd(int dag)
         {
             double res = Rijtijden[dag];
-            //res += 30 * Dagen[dag].Count;
 
             return res;
         }

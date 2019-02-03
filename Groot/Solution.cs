@@ -98,13 +98,6 @@ namespace Groot
                 case 7:
                     RemoveDumpen(truck, data);
                     break;
-                case 8:
-                    TwoAndAHalfOpt(truck, data);
-                    break;
-                case 9:
-                    TwoOpt(truck, data);
-                    break;
-
             }
         }
 
@@ -305,16 +298,6 @@ namespace Groot
             OrderTrucks[data.order1][orderIndex].Route = data.route2;
         }
 
-        public void TwoOpt(Truck truck, SolutionData data)
-        {
-            // TODO
-        }
-
-        public void TwoAndAHalfOpt(Truck truck, SolutionData data)
-        {            
-            // TODO
-        }
-
         // Adds a specific order WITHOUT using precalculated SolutionData
         public void AddSpecificOrder(Truck truck, int dag, int route, int index, int order)
         {
@@ -404,12 +387,10 @@ namespace Groot
             if (validVoor)
             {
                 Strafpunten += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
-                //StrafIntern += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
             }
             else if (validNa)
             {
                 Strafpunten -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 3d;
-                //StrafIntern -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
             }
         }
 
@@ -424,13 +405,6 @@ namespace Groot
         }
         void UpdateRijtijdStraf(double oud, double nieuw)
         {
-            /*if (oud <= MaxRijtijdDag && nieuw > MaxRijtijdDag)
-                StrafIntern += (nieuw - MaxRijtijdDag) * RijtijdStrafMinuut + RijtijdStraf;
-            else if (oud > MaxRijtijdDag && nieuw <= MaxRijtijdDag)
-                StrafIntern -= (oud - MaxRijtijdDag) * RijtijdStrafMinuut + RijtijdStraf;
-            else if (oud > MaxRijtijdDag && nieuw > MaxRijtijdDag)
-                StrafIntern += (nieuw - oud) * RijtijdStrafMinuut;*/
-
             if (oud >= MinRijtijdDag && nieuw < MinRijtijdDag)
                 StrafIntern += (MinRijtijdDag - nieuw) * RijtijdStrafMinuut + RijtijdStraf;
             else if (oud < MinRijtijdDag && nieuw >= MinRijtijdDag)

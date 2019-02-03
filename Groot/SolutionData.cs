@@ -57,13 +57,6 @@ namespace Groot
                 case 7:
                     RemoveDumpen();
                     break;
-                case 8:
-                    TwoAndAHalfOpt();
-                    break;
-                case 9:
-                    TwoOpt();
-                    break;
-
             }
 
             for (int j = 0; j < 5; j++)
@@ -707,29 +700,17 @@ namespace Groot
             UpdateRijtijdStraf(oudRijtijd, Truck1Rijtijden[dag1]);
         }
 
-        void TwoAndAHalfOpt()
-        {
-            // TODO
-        }
-
-        void TwoOpt()
-        {
-            // TODO
-        }
-
         void UpdateValid(int orderId, bool validVoor, bool validNa)
         {
             if (validVoor)
             {
                 SolutionStrafpunten += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * PenaltyModifier;
                 allow = false;
-                //StrafIntern += OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
             }
             else if (validNa)
             {
                 SolutionStrafpunten -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * PenaltyModifier;
                 allow = true;
-                //StrafIntern -= OrdersDict[orderId].Frequentie * OrdersDict[orderId].LedigingDuurMinuten * 1000d;
             }
         }
 
@@ -744,13 +725,6 @@ namespace Groot
         }
         void UpdateRijtijdStraf(double oud, double nieuw)
         {
-            /*if (oud <= MaxRijtijdDag && nieuw > MaxRijtijdDag)
-                SolutionStrafIntern += (nieuw - MaxRijtijdDag) * RijtijdStrafMinuut + RijtijdStraf;
-            else if (oud > MaxRijtijdDag && nieuw <= MaxRijtijdDag)
-                SolutionStrafIntern -= (oud - MaxRijtijdDag) * RijtijdStrafMinuut + RijtijdStraf;
-            else if (oud > MaxRijtijdDag && nieuw > MaxRijtijdDag)
-                SolutionStrafIntern += (nieuw - oud) * RijtijdStrafMinuut;*/
-
             if (oud >= MinRijtijdDag && nieuw < MinRijtijdDag)
                 SolutionStrafIntern += (MinRijtijdDag - nieuw) * RijtijdStrafMinuut + RijtijdStraf;
             else if (oud < MinRijtijdDag && nieuw >= MinRijtijdDag)

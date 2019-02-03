@@ -31,26 +31,6 @@ namespace Groot
                 res.ValidCheck[Orders[i].Key] = new ValidArray(f: Orders[i].Value.Frequentie);
                 res.Strafpunten += Orders[i].Value.Frequentie * Orders[i].Value.LedigingDuurMinuten * PenaltyModifier;
             }
-
-            /*for(int i = 0; i < 200; i++)
-            {
-                SolutionData newData = new SolutionData(res, RNG.Next(1));
-                res.Mutation(newData);
-            }*/
-            /*SolutionData newData2 = new SolutionData(res, RNG.Next(2, 6));
-            res.Mutation(newData2);*/
-            //res.startOplossingInladen("../../startoplossing.txt", res);
-
-
-            /*
-            for(int j = 0; j < 2; j++)
-                for(int i = 0; i < 5; i++)
-                {
-                    SolutionData newData = new SolutionData(res, 6, false);
-                    newData.AddSpecificDumpen(j, i, 0, res[j].Dagen[i][0].Item1.Count / 2);
-                    res.Mutation(newData);
-                }
-            */
             return res;
         }
 
@@ -59,8 +39,6 @@ namespace Groot
         public Solution FindSolution()
         {
             Solution currentSolution = GetStartSolution();
-
-            //AddCloud(currentSolution);
 
             Solution bestSolution = currentSolution.Copy();
             for (int reiterations = 0; reiterations < 10; reiterations++)
